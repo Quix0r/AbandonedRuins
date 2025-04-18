@@ -14,6 +14,13 @@ data:extend({
     order = "aa",
   },
   {
+    type = "bool-setting",
+    name = "AbandonedRuins-enable-debug-on-tick",
+    setting_type = "runtime-global",
+    default_value = false,
+    order = "aa",
+  },
+  {
     type = "int-setting",
     name = "ruins-min-distance-from-spawn",
     setting_type = "runtime-global",

@@ -2,6 +2,7 @@ local util = require("__AbandonedRuins20__/lua/utilities")
 local spawning = require("__AbandonedRuins20__/lua/spawning")
 
 debug_log = settings.global["AbandonedRuins-enable-debug-log"].value
+debug_on_tick = settings.global["AbandonedRuins-enable-debug-on-tick"].value
 
 ---@type table<string, RuinSet>
 local ruin_sets = {
@@ -67,26 +68,26 @@ script.on_event(defines.events.on_force_created,
 
 script.on_event(defines.events.on_tick,
   function(event)
-    if debug_log then log(string.format("[on_tick]: event.tick=%d - CALLED!", event.tick)) end
+    if debug_on_tick then log(string.format("[on_tick]: event.tick=%d - CALLED!", event.tick)) end
 
     ---@type RuinQueueItem[]
     local ruins = storage.ruin_queue[event.tick]
 
     if not ruins then
-      if debug_log then log(string.format("[on_tick]: No ruin queued for event.tick=%d  EXIT!", event.tick)) end
+      if debug_on_tick then log(string.format("[on_tick]: No ruin queued for event.tick=%d  EXIT!", event.tick)) end
       return
     end
 
-    if debug_log then log(string.format("[on_tick]: Spawning %d random ruin sets ...", #ruins)) end
+    if debug_on_tick then log(string.format("[on_tick]: Spawning %d random ruin sets ...", #ruins)) end
     for _, ruin in pairs(ruins) do
-      if debug_log then log(string.format("[on_tick]: Spawning ruin.size=%d,ruin.center='%s',ruin.surface='%s' ...", ruin.size, tostring(ruin.center), tostring(ruin.surface))) end
+      if debug_on_tick then log(string.format("[on_tick]: Spawning ruin.size=%d,ruin.center='%s',ruin.surface='%s' ...", ruin.size, tostring(ruin.center), tostring(ruin.surface))) end
       spawning.spawn_random_ruin(ruin_sets[settings.global["AbandonedRuins-set"].value][ruin.size], util.ruin_half_sizes[ruin.size], ruin.center, ruin.surface)
     end
 
-    if debug_log then log(string.format("[on_tick]: Deleting ruin(s) on event.tick=%d ...", event.tick)) end
+    if debug_on_tick then log(string.format("[on_tick]: Deleting ruin(s) on event.tick=%d ...", event.tick)) end
     storage.ruin_queue[event.tick] = nil
 
-    if debug_log then log("[on_tick]: EXIT!") end
+    if debug_on_tick then log("[on_tick]: EXIT!") end
   end
 )
 

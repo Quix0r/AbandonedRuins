@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.9
+Date: 2025-04-19
+  Changes:
+    - The event `on_tick` did generate to many useless messages, it is now separated from
+      usual debug purposes (EXTREMELY RARE USED!)
+---------------------------------------------------------------------------------------------------
 Version: 1.2.8
 Date: 2025-04-18
   Fixes:
