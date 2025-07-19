@@ -1,8 +1,6 @@
 local utils = require("__AbandonedRuins_updated_fork__/lua/utilities")
 local expressions = require("__AbandonedRuins_updated_fork__/lua/expression_parsing")
 
-debug_log = settings.global["ruins-enable-debug-log"].value
-
 local spawning = {}
 
 ---@param half_size number
@@ -10,8 +8,12 @@ local spawning = {}
 ---@param surface LuaSurface
 local function no_corpse_fade(half_size, center, surface)
   if debug_log then log(string.format("[no_corpse_fade]: half_size=%d,center[]='%s',surface[]='%s' - CALLED!", half_size, type(center), type(surface))) end
-  if half_size <= 0 or not center or not surface then return end
-  assert(surface.valid, string.format("[no_corpse_fade]: surface.name='%s' is not valid", surface.name))
+
+  if half_size <= 0 then
+    error(string.format("[no_corpse_fade]: Unexpected value half_size=%d, must be positive", half_size))
+  elseif not surface.valid then
+    error(string.format("[no_corpse_fade]: surface.name='%s' is not valid", surface.name))
+  end
 
   local area = utils.area_from_center_and_half_size(half_size, center)
   if debug_log then log(string.format("[no_corpse_fade]: area[]='%s',surface.name='%s'", type(area), surface.name)) end
@@ -44,7 +46,9 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
       type(prototypes)
     ))
   end
-  assert(surface.valid, string.format("[spawn_entity]: surface.name='%s' is not valid", surface.name))
+  if not surface.valid then
+    error(string.format("[spawn_entity]: surface.name='%s' is not valid", surface.name))
+  end
 
   local entity_name = expressions.entity(entity, vars)
   if debug_log then log(string.format("[spawn_entity]: entity_name='%s',entity.name='%s'", entity_name, entity.name)) end
@@ -65,7 +69,7 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
   if debug_log then log(string.format("[spawn_entity]: extra_options.recipe[]='%s'", type(extra_options.recipe))) end
   if extra_options.recipe then
     if not _G["prototypes"].recipe[extra_options.recipe] then
-      log(string.format("[spawn_entity]: recipe '%s'' does not exist!", extra_options.recipe))
+      log(string.format("[spawn_entity]: extra_options.recipe='%s'' does not exist!", extra_options.recipe))
     else
       recipe = extra_options.recipe
     end
@@ -98,16 +102,21 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
     local fluids = {}
     if debug_log then log(string.format("[spawn_entity]: Parsing %d fluids ...", #extra_options.fluids)) end
     for name, amount_expression in pairs(extra_options.fluids) do
-      if debug_log then log(string.format("[spawn_entity]: name='%s',amount_expression='%s'", name, amount_expression)) end
+      if debug_log then log(string.format("[spawn_entity]: name='%s',amount_expression='%s',vars[]='%s'", name, amount_expression, type(vars))) end
       local amount = expressions.number(amount_expression, vars)
+
+      if debug_log then log(string.format("[spawn_entity]: amount=%d", amount)) end
       if amount > 0 then
         if debug_log then log(string.format("[spawn_entity]: Adding fluid name='%s',amount=%d ...", name, amount)) end
         fluids[name] = amount
       end
     end
 
-    if debug_log then log(string.format("[spawn_entity]: Safely inserting %d fluids ...", #fluids)) end
-    utils.safe_insert_fluid(e, fluids)
+    if debug_log then log(string.format("[spawn_entity]: fluids()=%d", #fluids)) end
+    if #fluids > 0 then
+      if debug_log then log(string.format("[spawn_entity]: Safely inserting %d fluids ...", #fluids)) end
+      utils.safe_insert_fluid(e, fluids)
+    end
   end
 
   if debug_log then log(string.format("[spawn_entity]: extra_optios.items[]='%s'", type(extra_options.items))) end
@@ -142,10 +151,12 @@ end
 ---@param surface LuaSurface
 ---@param vars VariableValues
 local function spawn_entities(entities, center, surface, vars)
-  if debug_log then log(string.format("[spawn_entities]: entities[]=%s,center[]='%s',surface[]='%s',vars[]='%s' - CALLED!", type(entities), type(center), type(surface), type(vars))) end
-  if not entities or not surface then return end
-  if #entities == 0 then error(string.format("[spawn_entities]: No entities to spawn on surface.name='%s' - EXIT!", surface.name)) return end
-  assert(surface.valid, string.format("[spawn_entities]: surface.name='%s' is not valid", surface.name))
+  if debug_log then log(string.format("[spawn_entities]: entities[]='%s',center[]='%s',surface[]='%s',vars[]='%s' - CALLED!", type(entities), type(center), type(surface), type(vars))) end
+  if #entities == 0 then
+    error(string.format("[spawn_entities]: No entities to spawn on surface.name='%s' - EXIT!", surface.name))
+  elseif not surface.valid then
+    error(string.format("[spawn_entities]: surface.name='%s' is not valid", surface.name))
+  end
 
   local prototypes = prototypes.entity
 
@@ -161,10 +172,12 @@ end
 ---@param center MapPosition
 ---@param surface LuaSurface
 local function spawn_tiles(ruin_tiles, center, surface)
-  if debug_log then log(string.format("[spawn_tiles]: ruin_tiles[]=%s,center[]='%s',surface[]='%s' - CALLED!", type(ruin_tiles), type(center), type(surface))) end
-  if not ruin_tiles or not surface then return end
-  if #ruin_tiles == 0 then return end
-  assert(surface.valid, string.format("[spawn_entities]: surface.name='%s' is not valid", surface.name))
+  if debug_log then log(string.format("[spawn_tiles]: ruin_tiles[]='%s',center[]='%s',surface[]='%s' - CALLED!", type(ruin_tiles), type(center), type(surface))) end
+  if #ruin_tiles == 0 then
+    error("[spawn_tiles]: Cannot spawn empty run_tiles!")
+  elseif not surface.valid then
+    error(string.format("[spawn_tiles]: surface.name='%s' is not valid", surface.name))
+  end
 
   local tiles = {}
 
@@ -189,7 +202,7 @@ local function spawn_tiles(ruin_tiles, center, surface)
     true, -- remove_colliding_decoratives, Default: true
     true) -- raise_event,                  Default: false
 
-  if debug_log then log("[spawn_entities]: EXIT!") end
+  if debug_log then log("[spawn_tiles]: EXIT!") end
 end
 
 -- Evaluates the values of the variables.
@@ -197,8 +210,9 @@ end
 ---@return VariableValues
 local function parse_variables(variables)
   if debug_log then log(string.format("[parse_variables]: variables[]='%s' - CALLED!", type(variables))) end
-  if not variables then return end
-  if #variables == 0 then return end
+  if #variables == 0 then
+    error("[parse_variables]: Not parsing an empty variables list!")
+  end
 
   local parsed = {}
 
@@ -206,8 +220,10 @@ local function parse_variables(variables)
   for _, var in pairs(variables) do
     if debug_log then log(string.format("[parse_variables]: var.type='%s',var.name='%s',var.value[]='%s'", var.type, var.name, type(var.value))) end
     if var.type == "entity-expression" then
+      if debug_log then log(string.format("[parse_variables]: Parsing entity expression for var.name='%s',var.value[]='%s' ...", var.name, type(var.value))) end
       parsed[var.name] = expressions.entity(var.value)
     elseif var.type == "number-expression" then
+      if debug_log then log(string.format("[parse_variables]: Parsing number expression for var.name='%s',var.value[]='%s' ...", var.name, type(var.value))) end
       parsed[var.name] = expressions.number(var.value)
     else
       error(string.format("[parse_variables]: Unrecognized variable type: '%s'", var.type))
@@ -224,8 +240,13 @@ end
 ---@return boolean @Whether the area is clear and ruins can be spawned
 local function clear_area(half_size, center, surface)
   if debug_log then log(string.format("[clear_area]: half_size[]='%s',center[]='%s',surface[]='%s' - CALLED!", type(half_size), type(center), type(surface))) end
+  if half_size <= 0 then
+    error(string.format("[clear_area]: Unexpected value half_size=%d, must be positive", half_size))
+  elseif not surface.valid then
+    error(string.format("[clear_area]: surface.name='%s' is not valid", surface.name))
+  end
+
   local area = utils.area_from_center_and_half_size(half_size, center)
-  assert(surface.valid, string.format("[clear_area]: surface.name='%s' is not valid", surface.name))
 
   -- exclude tiles that we shouldn't spawn on
   if surface.count_tiles_filtered{ area = area, limit = 1, collision_mask = { item = true, object = true, water_tile = true } } == 1 then
@@ -249,23 +270,31 @@ end
 ---@param center MapPosition
 ---@param surface LuaSurface
 spawning.spawn_ruin = function(ruin, half_size, center, surface)
-  if debug_log then log(string.format("[spawn_ruin]: ruin[]='%s',half_size[]='%s',center[]='%s',surface='%s' - CALLED!", type(ruin), type(half_size), type(center), type(surface))) end
-  if not ruin then
-    error("Parameter 'ruin' is not set")
-    return
-  elseif not surface then
-    error("Parameter 'surface' is not set")
-    return
+  if debug_log then log(string.format("[spawn_ruin]: ruin[]='%s',half_size[]='%s',center[]='%s',surface[]='%s' - CALLED!", type(ruin), type(half_size), type(center), type(surface))) end
+  if half_size <= 0 then
+    error(string.format("[spawn_ruin]: Unexpected value half_size=%d, must be positive", half_size))
+  elseif not surface.valid then
+    error(string.format("[spawn_ruin]: surface.name='%s' is not valid", surface.name))
   end
 
-  assert(surface.valid, string.format("[spawn_ruin]: surface.name='%s' is not valid", surface.name))
-
   if clear_area(half_size, center, surface) then
-    local variables = parse_variables(ruin.variables)
-    if debug_log then log(string.format("[spawn_ruin]: variables[]='%s'", type(variables))) end
+    local variables = {}
+    if debug_log then log(string.format("[spawn_ruin]: ruin.variables[]='%s'", type(ruin.variables))) end
+    if ruin.variables ~= nil then
+      local variables = parse_variables(ruin.variables)
+    end
+    if debug_log then log(string.format("[spawn_ruin]: variables[%s]()=%d,ruin.entities[]='%s'", type(variables), #variables, type(ruin.entities))) end
 
+    if ruin.entities == nil then
+      game.print(string.format("Won't spawn a ruin at '%s' as no entities are included. Please report this to your ruin-set developer!", surface.name))
+      return
+    end
     spawn_entities(ruin.entities, center, surface, variables)
-    spawn_tiles(ruin.tiles, center, surface)
+
+    if debug_log then log(string.format("[spawn_ruin]: ruin.tiles[]='%s'", type(ruin.tiles))) end
+    if ruin.tiles ~= nil then
+      spawn_tiles(ruin.tiles, center, surface)
+    end
     no_corpse_fade(half_size, center, surface)
   end
 
@@ -277,18 +306,12 @@ end
 ---@param center MapPosition
 ---@param surface LuaSurface
 spawning.spawn_random_ruin = function(ruins, half_size, center, surface)
-  if debug_log then log(string.format("[spawn_random_ruin]: ruins[]='%s',half_size[]='%s',center[]='%s',surface='%s' - CALLED!", type(ruins), type(half_size), type(center), type(surface))) end
-  if not ruins then
-    error("Parameter 'ruins' is not set")
-    return
-  elseif not surface then
-    error("Parameter 'surface' is not set")
-    return
-  elseif #ruins == 0 then
-    error("Array 'ruins' is empty")
+  if debug_log then log(string.format("[spawn_random_ruin]: ruins[]='%s',half_size[]='%s',center[]='%s',surface[]='%s' - CALLED!", type(ruins), type(half_size), type(center), type(surface))) end
+  if #ruins == 0 then
+    error("[spawn_random_ruin]: Array 'ruins' is empty")
+  elseif not surface.valid then
+    error(string.format("[spawn_random_ruin]: surface.name='%s' is not valid", surface.name))
   end
-
-  assert(surface.valid, string.format("[spawn_random_ruin]: surface.name='%s' is not valid", surface.name))
 
   --spawn a random ruin from the list
   spawning.spawn_ruin(ruins[math.random(#ruins)], half_size, center, surface)

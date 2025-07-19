@@ -1,7 +1,12 @@
 local util = require("__AbandonedRuins_updated_fork__/lua/utilities")
 local spawning = require("__AbandonedRuins_updated_fork__/lua/spawning")
 
-local SURFACE_NAME = "ruins"
+-- Debugging world
+local SURFACE_NAME = "debug-ruins"
+
+-- Enable debug log by default
+settings.global["ruins-enable-debug-log"].value = true
+debug_log = true
 
 ---@param center MapPosition
 ---@param half_size number
@@ -48,6 +53,8 @@ script.on_event(defines.events.on_player_created, function(event)
   local ruin_set = remote.call("AbandonedRuins", "get_current_ruin_set")
   local total_ruins_amount = #ruin_set.small + #ruin_set.medium + #ruin_set.large
   local chunk_radius = math.ceil(math.sqrt(total_ruins_amount) / 2)
+  log(string.format("[on_player_created]: total_ruins_amount=%d,chunk_radius=%.2f", total_ruins_amount, chunk_radius))
+
   local mgs = {
     width  = chunk_radius * 2 * 32,
     height = chunk_radius * 2 * 32,
@@ -60,7 +67,10 @@ script.on_event(defines.events.on_player_created, function(event)
   local surface = game.create_surface(SURFACE_NAME, mgs)
 
   -- skip invalid surfaces
-  if not surface.valid then return end
+  if not surface.valid then
+    log(string.format("WARNING: surface.name='%s' is not valid - EXIT!", surface.name))
+    return
+  end
 
   surface.request_to_generate_chunks({0, 0}, chunk_radius)
   surface.force_generate_chunk_requests()
@@ -72,6 +82,7 @@ script.on_event(defines.events.on_player_created, function(event)
   for size, ruin_list in pairs(ruin_set) do
     for _, ruin in pairs(ruin_list) do
       local center = util.get_center_of_chunk({x = x, y = y})
+
       spawning.spawn_ruin(ruin, util.ruin_half_sizes[size], center, surface)
       draw_dimensions(center, util.ruin_half_sizes[size], surface)
 

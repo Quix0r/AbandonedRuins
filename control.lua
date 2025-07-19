@@ -58,6 +58,12 @@ local function init_spawn_chances()
   if debug_log then log("[init_spawn_chances]: EXIT!") end
 end
 
+local function update_debug_log()
+  debug_log = settings.global["ruins-enable-debug-log"].value
+  debug_on_tick = settings.global["ruins-enable-debug-on-tick"].value
+  game.print(string.format("debug log is now: %s/%s", debug_log, debug_on_tick))
+end
+
 local function init()
   if debug_log then log("[init]: CALLED!") end
   util.set_enemy_force_cease_fire(util.get_enemy_force(), not settings.global["ruins-enemy-not-cease-fire"].value)
@@ -83,7 +89,9 @@ local function init()
 end
 
 script.on_init(init)
+script.on_configuration_changed(update_debug_log)
 script.on_configuration_changed(init)
+script.on_event(defines.events.on_player_created, update_debug_log)
 script.on_event(defines.events.on_runtime_mod_setting_changed, init)
 
 script.on_event(defines.events.on_force_created,
@@ -112,7 +120,7 @@ script.on_event(defines.events.on_tick,
 
     if debug_on_tick then log(string.format("[on_tick]: Spawning %d random ruin sets ...", #ruins)) end
     for _, ruin in pairs(ruins) do
-      if debug_on_tick then log(string.format("[on_tick]: Spawning ruin.size=%d,ruin.center='%s',ruin.surface='%s' ...", ruin.size, tostring(ruin.center), tostring(ruin.surface))) end
+      if debug_on_tick then log(string.format("[on_tick]: Spawning ruin.size='%s',ruin.center='%s',ruin.surface='%s' ...", ruin.size, tostring(ruin.center), tostring(ruin.surface))) end
       spawning.spawn_random_ruin(_ruin_sets[settings.global["current-ruin-set"].value][ruin.size], util.ruin_half_sizes[ruin.size], ruin.center, ruin.surface)
     end
 
@@ -238,12 +246,11 @@ script.on_event({defines.events.on_player_selected_area, defines.events.on_playe
     end
   end
 
-  if debug_log then log("[on_player_selected_area]:EXIT!") end
+  if debug_log then log("[on_player_selected_area]: EXIT!") end
 end)
 
 remote.add_interface("AbandonedRuins",
 {
-  get_on_entity_force_changed_event = function() return on_entity_force_changed_event end,
   -- The event contains:
   ---@class on_entity_force_changed_event_data:EventData
   ---@field entity LuaEntity The entity that had its force changed.
@@ -251,15 +258,20 @@ remote.add_interface("AbandonedRuins",
   -- The current force can be gotten from event.entity.
   -- This is raised after the force is changed.
   -- Mod event subscription explanation can be found lower in this file.
+  get_on_entity_force_changed_event = function() return on_entity_force_changed_event end,
 
   -- Set whether ruins should be spawned at all
   ---@param spawn_ruins boolean
   set_spawn_ruins = function(spawn_ruins)
+    if debug_log then log(string.format("[set_spawn_ruins]: spawn_ruins[]=%s - CALLED!", type(spawn_ruins))) end
     if type(spawn_ruins) ~= "boolean" then
       error(string.format("spawn_ruins[]='%s' is not expected type 'boolean'", type(spawn_ruins)))
     end
 
+    if debug_log then log(string.format("[set_spawn_ruins]: Setting spawn_ruins=%s", spawn_ruins)) end
     storage.spawn_ruins = spawn_ruins
+
+    if debug_log then log("[set_spawn_ruins]: EXIT!") end
   end,
 
   -- Get whether ruins should be spawned at all
@@ -285,21 +297,29 @@ remote.add_interface("AbandonedRuins",
   -- Any surface whose name contains this string will not have ruins generated on it.
   ---@param name string
   exclude_surface = function(name)
+    if debug_log then log(string.format("[exclude_surface]: name[]='%s',ruin_sets[]='%s' - CALLED!", type(name), type(ruin_sets))) end
     if type(name) ~= "string" then
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     end
 
+    if debug_log then log(string.format("[exclude_surface]: Excluding surface name='%s' ...", name)) end
     storage.excluded_surfaces[name] = true
+
+    if debug_log then log("[exclude_surface]: EXIT!") end
   end,
 
   -- You excluded a surface at some earlier point but you don't want it excluded anymore.
   ---@param name string
   reinclude_surface = function(name)
+    if debug_log then log(string.format("[reinclude_surface]: name[]='%s',ruin_sets[]='%s' - CALLED!", type(name), type(ruin_sets))) end
     if type(name) ~= "string" then
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     end
 
+    if debug_log then log(string.format("[reinclude_surface]: Reincluding surface name='%s' ...", name)) end
     storage.excluded_surfaces[name] = nil
+
+    if debug_log then log("[reinclude_surface]: EXIT!") end
   end,
 
   -- !! ALWAYS call this in on_load and on_init. !!
@@ -309,11 +329,15 @@ remote.add_interface("AbandonedRuins",
   ---@param name string
   ---@param ruin_sets table<string, Ruins[]>
   add_ruin_sets = function(name, ruin_sets)
+    if debug_log then log(string.format("[add_ruin_sets]: name[]='%s',ruin_sets[]='%s' - CALLED!", type(name), type(ruin_sets))) end
     if type(name) ~= "string" then
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     end
 
+    if debug_log then log(string.format("[add_ruin_sets]: Setting name='%s' ruin sets ...", name)) end
     _ruin_sets[name] = ruin_sets
+
+    if debug_log then log("[add_ruin_sets]: EXIT!") end
   end,
 
   -- !! ALWAYS call this in on_load and on_init. !!
@@ -348,17 +372,19 @@ remote.add_interface("AbandonedRuins",
   ---@param name string
   ---@return RuinSet
   get_ruin_set = function(name)
+    if debug_log then log(string.format("[get_ruin_set]: name[]='%s' - CALLED!", type(name))) end
     if type(name) ~= "string" then
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     end
 
+    if debug_log then log(string.format("[get_ruin_set]: Returining ruin set for name='%s' - EXIT!", name)) end
     return _ruin_sets[name]
   end,
 
-  -- !! The ruins sets are not saved or loaded. !!
-  -- returns {small = {<array of ruins>}, medium = {<array of ruins>}, large = {<array of ruins>}}
+  -- Returns a table with: {<size> = {<array of ruins>}, <size-n> = {<array of ruins>}}}
   ---@return RuinSet
   get_current_ruin_set = function()
+    if debug_log then log(string.format("[get_current_ruin_set]: current-ruin-set='%s'", settings.global["current-ruin-set"].value)) end
     return _ruin_sets[settings.global["current-ruin-set"].value]
   end
 })

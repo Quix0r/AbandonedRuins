@@ -1,7 +1,5 @@
 local core_utils = require("__core__/lualib/util")
 
-debug_log = settings.global["ruins-enable-debug-log"].value
-
 local util = {}
 
 util.ruin_half_sizes =
