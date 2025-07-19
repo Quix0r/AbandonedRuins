@@ -2,7 +2,7 @@
 
 ## Bug reports
 
-Please include the [log file](https://wiki.factorio.com/Log_file) in your bug reports.
+Please include the [log file](https://wiki.factorio.com/Log_file) in your bug reports. Enable debug logging (not for on_tick!) before uploading the log file.
 
 ## Contributing ruins
 

@@ -1,21 +1,21 @@
 data:extend({
   {
     type = "bool-setting",
-    name = "AbandonedRuins-enemy-not-cease-fire",
+    name = "ruins-enemy-not-cease-fire",
     setting_type = "runtime-global",
     default_value = true,
     order = "a",
   },
   {
     type = "bool-setting",
-    name = "AbandonedRuins-enable-debug-log",
+    name = "ruins-enable-debug-log",
     setting_type = "runtime-global",
     default_value = false,
     order = "aa",
   },
   {
     type = "bool-setting",
-    name = "AbandonedRuins-enable-debug-on-tick",
+    name = "ruins-enable-debug-on-tick",
     setting_type = "runtime-global",
     default_value = false,
     order = "aa",
@@ -58,7 +58,7 @@ data:extend({
   },
   {
     type = "string-setting",
-    name = "AbandonedRuins-set",
+    name = "current-ruin-set",
     setting_type = "runtime-global",
     allowed_values = {"base"},
     default_value = "base",

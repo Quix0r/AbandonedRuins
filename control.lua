@@ -1,54 +1,77 @@
-local util = require("__AbandonedRuins20__/lua/utilities")
-local spawning = require("__AbandonedRuins20__/lua/spawning")
+local util = require("__AbandonedRuins_updated_fork__/lua/utilities")
+local spawning = require("__AbandonedRuins_updated_fork__/lua/spawning")
 
-debug_log = settings.global["AbandonedRuins-enable-debug-log"].value
-debug_on_tick = settings.global["AbandonedRuins-enable-debug-on-tick"].value
+debug_log = settings.global["ruins-enable-debug-log"].value
+debug_on_tick = settings.global["ruins-enable-debug-on-tick"].value
 
+-- Init ruin sets (empty for now)
 ---@type table<string, RuinSet>
-local ruin_sets = {
-  -- Load base set
-  base = require("__AbandonedRuins20__/lua/ruins/base_ruin_set")
-}
+local _ruin_sets = {}
+
+-- Initial ruin sizes: small, medium, large
+---@type table<string>
+local ruin_sizes = {"small", "medium", "large"}
 
 local on_entity_force_changed_event = script.generate_event_name()
 
-local function spawn_chances()
-  if debug_on_tick then log("[spawn_chances]: CALLED!") end
+local function init_spawn_chances()
+  if debug_log then log("[init_spawn_chances]: CALLED!") end
 
-  local smallChance  = settings.global["ruins-small-ruin-chance"].value
-  local mediumChance = settings.global["ruins-medium-ruin-chance"].value
-  local largeChance  = settings.global["ruins-large-ruin-chance"].value
-  if debug_on_tick then log(string.format("[spawn_chances]: smallChance=%.0f,mediumChance=%.0f,largeChance=%.0f", smallChance, mediumChance, largeChance)) end
+  -- Init spawn_chances table if not found
+  if storage.spawn_chances == nil then
+    storage.spawn_chances = {}
+    for _, size in pairs(ruin_sizes) do
+      storage.spawn_chances[size] = 0.0
+    end
+  end
 
-  local sumChance = smallChance + mediumChance + largeChance
+  -- Init local tables, variables
+  local chances = {}
+  local thresholds = {}
+  local sumChance = 0.0
+
+  for _, size in pairs(ruin_sizes) do
+    chances[size] = settings.global["ruins-" .. size .. "-ruin-chance"].value
+    sumChance = sumChance + chances[size]
+    if debug_log then log(string.format("[init_spawn_chances]: chances[%s]=%.2f", size, chances[size])) end
+  end
+
   local totalChance = math.min(sumChance, 1)
-  if debug_on_tick then log(string.format("[spawn_chances]: sumChance=%.0f,totalChance=%.0f", sumChance, totalChance)) end
+  if debug_log then log(string.format("[init_spawn_chances]: sumChance=%.2f,totalChance=%.2f", sumChance, totalChance)) end
 
   -- now compute cumulative distribution of conditional probabilities for
   -- spawn_type given a spawn occurs.
-  local smallThreshold  = smallChance  / sumChance * totalChance
-  local mediumThreshold = mediumChance / sumChance * totalChance + smallThreshold
-  local largeThreshold  = largeChance  / sumChance * totalChance + mediumThreshold
-  if debug_on_tick then log(string.format("[spawn_chances]: smallThreshold=%.0f,mediumThreshold=%.0f,largeThreshold=%.0f", smallThreshold, mediumThreshold, largeThreshold)) end
+  for i, size in pairs(ruin_sizes) do
+    if debug_log then log(string.format("[init_spawn_chances]: i=%d,size='%s'", i, size)) end
+    thresholds[size] = chances[size]  / sumChance * totalChance
+    if i > 1 then
+      thresholds[size] = thresholds[size] + thresholds[ruin_sizes[i]]
+    end
+    if debug_log then log(string.format("[init_spawn_chances]: thresholds[%s]=%.2f", size, thresholds[size])) end
+  end
 
-  storage.spawn_changes = {
-    small  = smallThreshold,
-    medium = mediumThreshold,
-    large  = largeThreshold
-  }
+  for size, threshold in pairs(thresholds) do
+    if debug_log then log(string.format("[init_spawn_chances]: Addding size='%s',threshold=%.2f ...", size, threshold)) end
+    storage.spawn_chances[size] = threshold
+  end
 
-  if debug_on_tick then log("[spawn_chances]: EXIT!") end
+  if debug_log then log("[init_spawn_chances]: EXIT!") end
 end
 
 local function init()
-  util.set_enemy_force_cease_fire(util.get_enemy_force(), not settings.global["AbandonedRuins-enemy-not-cease-fire"].value)
+  if debug_log then log("[init]: CALLED!") end
+  util.set_enemy_force_cease_fire(util.get_enemy_force(), not settings.global["ruins-enemy-not-cease-fire"].value)
 
-  spawn_chances()
+  init_spawn_chances()
+
   if storage.spawn_ruins == nil then
     storage.spawn_ruins = true
   end
+
   storage.ruin_queue = storage.ruin_queue or {}
+
   if not storage.excluded_surfaces then
+    if debug_log then log("[init]: Initializing excluded_surfaces table ...") end
     storage.excluded_surfaces = {
       ["beltlayer"]     = true,
       ["pipelayer"]     = true,
@@ -56,6 +79,7 @@ local function init()
       ["ControlRoom"]   = true -- mobile factory
     }
   end
+  if debug_log then log("[init]: EXIT!") end
 end
 
 script.on_init(init)
@@ -65,7 +89,7 @@ script.on_event(defines.events.on_runtime_mod_setting_changed, init)
 script.on_event(defines.events.on_force_created,
   function()
     -- Sets up the diplomacy for all forces, not just the newly created one.
-    util.set_enemy_force_diplomacy(util.get_enemy_force(), not settings.global["AbandonedRuins-enemy-not-cease-fire"].value)
+    util.set_enemy_force_diplomacy(util.get_enemy_force(), not settings.global["ruins-enemy-not-cease-fire"].value)
   end
 )
 
@@ -89,7 +113,7 @@ script.on_event(defines.events.on_tick,
     if debug_on_tick then log(string.format("[on_tick]: Spawning %d random ruin sets ...", #ruins)) end
     for _, ruin in pairs(ruins) do
       if debug_on_tick then log(string.format("[on_tick]: Spawning ruin.size=%d,ruin.center='%s',ruin.surface='%s' ...", ruin.size, tostring(ruin.center), tostring(ruin.surface))) end
-      spawning.spawn_random_ruin(ruin_sets[settings.global["AbandonedRuins-set"].value][ruin.size], util.ruin_half_sizes[ruin.size], ruin.center, ruin.surface)
+      spawning.spawn_random_ruin(_ruin_sets[settings.global["current-ruin-set"].value][ruin.size], util.ruin_half_sizes[ruin.size], ruin.center, ruin.surface)
     end
 
     if debug_on_tick then log(string.format("[on_tick]: Deleting ruin(s) on event.tick=%d ...", event.tick)) end
@@ -125,7 +149,9 @@ end
 ---@param tick uint
 local function try_ruin_spawn(size, min_distance, center, surface, tick)
   if debug_log then log(string.format("[try_ruin_spawn]: size='%s',min_distance=%d,center[]='%s',surface[]='%s',tick=%d - CALLED!", size, min_distance, type(center), type(surface), tick)) end
-  assert(util.ruin_min_distance_multiplier[size], string.format("[try_ruin_spawn]: size='%s' is not found in multiplier table", size))
+  if util.ruin_min_distance_multiplier[size] == nil then
+    error(string.format("[try_ruin_spawn]: size='%s' is not found in multiplier table", size))
+  end
 
   min_distance = min_distance * util.ruin_min_distance_multiplier[size]
   if debug_log then log(string.format("[try_ruin_spawn]: min_distance=%d", min_distance)) end
@@ -137,13 +163,13 @@ local function try_ruin_spawn(size, min_distance, center, surface, tick)
 
   -- random variance so they aren't always chunk aligned
   local variance = -(util.ruin_half_sizes[size] * 0.75) + 12 -- 4 -> 9, 8 -> 6, 16 -> 0. Was previously 4 -> 10, 8 -> 5, 16 -> 0
-  if debug_log then log(string.format("[try_ruin_spawn]: variance=%.0f,center.x=%d,center.y=%d - BEFORE!", variance, center.x, center.y)) end
+  if debug_log then log(string.format("[try_ruin_spawn]: variance=%.2f,center.x=%d,center.y=%d - BEFORE!", variance, center.x, center.y)) end
   if variance > 0 then
-    if debug_log then log(string.format("[try_ruin_spawn]: Applying random variance=%.0f ...", variance)) end
+    if debug_log then log(string.format("[try_ruin_spawn]: Applying random variance=%.2f ...", variance)) end
     center.x = center.x + math.random(-variance, variance)
     center.y = center.y + math.random(-variance, variance)
   end
-  if debug_log then log(string.format("[try_ruin_spawn]: variance=%.0f,center.x=%d,center.y=%d - AFTER!", variance, center.x, center.y)) end
+  if debug_log then log(string.format("[try_ruin_spawn]: variance=%.2f,center.x=%d,center.y=%d - AFTER!", variance, center.x, center.y)) end
 
   queue_ruin(tick, {size = size, center = center, surface = surface})
 
@@ -166,15 +192,12 @@ script.on_event(defines.events.on_chunk_generated,
     local spawn_chance = math.random()
     if debug_log then log(string.format("[on_chunk_generated]: center.x=%d,center.y=%d,min_distance=%d,spawn_chance=%0.f", center.x, center.y, min_distance, spawn_chance)) end
 
-    if spawn_chance <= storage.spawn_changes["small"] then
-      if debug_log then log(string.format("[on_chunk_generated]: Trying to spawn small ruin at event.surface='%s' ...", event.surface)) end
-      try_ruin_spawn("small", min_distance, center, event.surface, event.tick)
-    elseif spawn_chance <= storage.spawn_changes["medium"] then
-      if debug_log then log(string.format("[on_chunk_generated]: Trying to spawn medium ruin at event.surface='%s' ...", event.surface)) end
-      try_ruin_spawn("medium", min_distance, center, event.surface, event.tick)
-    elseif spawn_chance <= storage.spawn_changes["large"] then
-      if debug_log then log(string.format("[on_chunk_generated]: Trying to spawn large ruin at event.surface='%s' ...", event.surface)) end
-      try_ruin_spawn("large", min_distance, center, event.surface, event.tick)
+    for _, size in pairs(ruin_sizes) do
+      if debug_log then log(string.format("[on_chunk_generated]: spawn_chances[%s]=%.2f,spawn_chance=%.2f", size, storage.spawn_chances[size], spawn_chance)) end
+      if spawn_chance <= storage.spawn_chances[size] then
+        if debug_log then log(string.format("[on_chunk_generated]: Trying to spawn ruin of size='%s' at event.surface='%s' ...", size, event.surface)) end
+        try_ruin_spawn(size, min_distance, center, event.surface, event.tick)
+      end
     end
 
     if debug_log then log("[on_chunk_generated]: EXIT!") end
@@ -232,9 +255,10 @@ remote.add_interface("AbandonedRuins",
   -- Set whether ruins should be spawned at all
   ---@param spawn_ruins boolean
   set_spawn_ruins = function(spawn_ruins)
-    assert(type(spawn_ruins) == "boolean",
-      "Remote call parameter to set_spawn_ruins for AbandonedRuins must be a boolean value."
-    )
+    if type(spawn_ruins) ~= "boolean" then
+      error(string.format("spawn_ruins[]='%s' is not expected type 'boolean'", type(spawn_ruins)))
+    end
+
     storage.spawn_ruins = spawn_ruins
   end,
 
@@ -242,28 +266,54 @@ remote.add_interface("AbandonedRuins",
   ---@return boolean
   get_spawn_ruins = function() return storage.spawn_ruins end,
 
+  -- Add ruin size
+  ---@param name string
+  add_ruin_size = function(name)
+    if type(name) ~= "string" then
+      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+    elseif ruin_sizes[name] ~= nil then
+      error(string.format("name='%s' is already added as ruin size", name))
+    end
+
+    table.insert(ruin_sizes, name)
+  end,
+
+  -- Get all ruin sizes
+  ---@return table
+  get_ruin_sizes = function() return ruin_sizes end,
+
   -- Any surface whose name contains this string will not have ruins generated on it.
   ---@param name string
   exclude_surface = function(name)
-    assert(type(name) == "string",
-      "Remote call parameter to exclude_surface for AbandonedRuins must be a string value."
-    )
-    assert(not storage.excluded_surfaces[name],
-      string.format("Surface '%s' is already added as excluded surface.", name)
-    )
+    if type(name) ~= "string" then
+      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+    end
+
     storage.excluded_surfaces[name] = true
   end,
 
   -- You excluded a surface at some earlier point but you don't want it excluded anymore.
   ---@param name string
   reinclude_surface = function(name)
-    assert(type(name) == "string",
-      "Remote call parameter to reinclude_surface for AbandonedRuins must be a string value."
-    )
-    assert(storage.excluded_surfaces[name],
-      string.format("Surface '%s' is already an included surface.", name)
-    )
+    if type(name) ~= "string" then
+      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+    end
+
     storage.excluded_surfaces[name] = nil
+  end,
+
+  -- !! ALWAYS call this in on_load and on_init. !!
+  -- !! The ruins sets are not saved or loaded. !!
+  -- The ruins should have the sizes given in util.ruin_half_sizes, e.g. ruins in the small_ruins array should be 8x8 tiles.
+  -- See also: docs/ruin_sets.md
+  ---@param name string
+  ---@param ruin_sets table<string, Ruins[]>
+  add_ruin_sets = function(name, ruin_sets)
+    if type(name) ~= "string" then
+      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+    end
+
+    _ruin_sets[name] = ruin_sets
   end,
 
   -- !! ALWAYS call this in on_load and on_init. !!
@@ -275,17 +325,18 @@ remote.add_interface("AbandonedRuins",
   ---@param medium_ruins Ruin[]
   ---@param large_ruins Ruin[]
   add_ruin_set = function(name, small_ruins, medium_ruins, large_ruins)
-    assert(type(name) == "string",
-      "Remote call parameter to add_ruin_set for AbandonedRuins must be a string value."
-    )
-    assert(not ruin_sets[name],
-      string.format("Ruin-set '%s' is already added.", name)
-    )
-    assert(small_ruins and next(small_ruins))
-    assert(medium_ruins and next(medium_ruins))
-    assert(large_ruins and next(large_ruins))
+    log("[add_ruin_set]: DEPECATED! This function only allows 'small', 'medium' and 'large'. Please use add_ruin_sets() instead!")
+    if type(name) ~= "string" then
+      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+    elseif not (small_ruins and next(small_ruins)) then
+      error("Argument 'small_ruins' is an empty ruin set")
+    elseif not (medium_ruins and next(medium_ruins)) then
+      error("Argument 'medium_ruins' is an empty ruin set")
+    elseif not (large_ruins and next(large_ruins)) then
+      error("Argument 'large_ruins' is an empty ruin set")
+    end
 
-    ruin_sets[name] = {
+    _ruin_sets[name] = {
       small  = small_ruins,
       medium = medium_ruins,
       large  = large_ruins
@@ -297,20 +348,18 @@ remote.add_interface("AbandonedRuins",
   ---@param name string
   ---@return RuinSet
   get_ruin_set = function(name)
-    assert(type(name) == "string",
-      "Remote call parameter to get_ruin_set for AbandonedRuins must be a string value."
-    )
-    assert(ruin_sets[name],
-      string.format("Ruin-set '%s' is not found.", name)
-    )
-    return ruin_sets[name]
+    if type(name) ~= "string" then
+      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+    end
+
+    return _ruin_sets[name]
   end,
 
   -- !! The ruins sets are not saved or loaded. !!
   -- returns {small = {<array of ruins>}, medium = {<array of ruins>}, large = {<array of ruins>}}
   ---@return RuinSet
   get_current_ruin_set = function()
-    return ruin_sets[settings.global["AbandonedRuins-set"].value]
+    return _ruin_sets[settings.global["current-ruin-set"].value]
   end
 })
 
@@ -320,7 +369,7 @@ remote.add_interface("AbandonedRuins",
   Example:
 
   script.on_load(function()
-    if remote.interfaces["AbandonedRuins"] then
+    if script.active_mods["AbandonedRuins"] then
       script.on_event(remote.call("AbandonedRuins", "get_on_entity_force_changed_event"),
       ---@param event on_entity_force_changed_event_data
       function(event)
@@ -335,7 +384,7 @@ remote.add_interface("AbandonedRuins",
   end)
 
   script.on_init(function()
-    if remote.interfaces["AbandonedRuins"] then
+    if script.active_mods["AbandonedRuins"] then
       script.on_event(remote.call("AbandonedRuins", "get_on_entity_force_changed_event"),
       ---@param event on_entity_force_changed_event_data
       function(event)

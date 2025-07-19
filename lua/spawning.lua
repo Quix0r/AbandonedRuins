@@ -1,5 +1,7 @@
-local utils = require("__AbandonedRuins20__/lua/utilities")
-local expressions = require("__AbandonedRuins20__/lua/expression_parsing")
+local utils = require("__AbandonedRuins_updated_fork__/lua/utilities")
+local expressions = require("__AbandonedRuins_updated_fork__/lua/expression_parsing")
+
+debug_log = settings.global["ruins-enable-debug-log"].value
 
 local spawning = {}
 

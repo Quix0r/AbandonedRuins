@@ -1,3 +1,5 @@
+debug_log = settings.global["ruins-enable-debug-log"].value
+
 local parsing = {}
 
 -- extend table 1 with table 2
