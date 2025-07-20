@@ -1,4 +1,4 @@
-# The Ruins Mod
+# Abandoned Ruins - Updated to Factorio 2.0
 
 *You weren't the first to come here... you won't be the last...*
 
@@ -14,6 +14,6 @@ Want to add your ruins to this mod?<br>
 Check out the [ruin maker mod](https://github.com/Bilka2/ruin-maker), the [contributing guidelines](docs/CONTRIBUTING.md) and the documentation of the [ruin data format](docs/format.md).
 
 Want to make your own ruin set?<br>
-Check out the links above, the [ruin set](docs/ruin_sets.md) documentation and [The Ruins Mod - Krastorio2](https://github.com/Bilka2/AbandonedRuins-Krastorio2) as an example mod.
+Check out the links above, the [ruin set](docs/ruin_sets.md) documentation and [Abandoned Ruins - Base set](https://github.com/Quix0r/AbandonedRuins-base) as a playable example mod.
 
 The remote interfaces that this mod provides are described with comments at the end of [control.lua](control.lua#L138).
