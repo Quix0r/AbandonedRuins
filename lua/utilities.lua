@@ -51,7 +51,7 @@ util.safe_insert = core_utils.insert_safe
 ---@param entity LuaEntity
 ---@param fluid_dict table<string, number> Dictionary of fluid names to amounts
 util.safe_insert_fluid = function(entity, fluid_dict)
-  if debug_log then log("[safe_insert_fluid]: entity[]='%s',fluid_dict[]='%s' - CALLED!", type(entity), type(fluid_dict)) end
+  if debug_log then log(string.format("[safe_insert_fluid]: entity[]='%s',fluid_dict[]='%s' - CALLED!", type(entity), type(fluid_dict))) end
   if not (entity and entity.valid and fluid_dict) then
     log(string.format("[safe_insert_fluid]: entitiy[]='%s' or fluid_dict[]='%s' is not valid!", type(entity), type(fluid_dict)))
     return

@@ -19,7 +19,7 @@ local function no_corpse_fade(half_size, center, surface)
   if debug_log then log(string.format("[no_corpse_fade]: area[]='%s',surface.name='%s'", type(area), surface.name)) end
 
   for _, entity in pairs(surface.find_entities_filtered({area = area, type={"corpse", "rail-remnants"}})) do
-    if debug_log then log(string.format("[no_corpse_fade]: entity.type='%s',entity.name='%s' - Setting corpse_expires=false ...", entity.type, entity.name)) end
+    if debug_log then log(string.format("[no_corpse_fade]: entity.type='%s',entity.name='%s',entity.valid='%s' - Setting corpse_expires=false ...", entity.type, entity.name, entity.valid)) end
     entity.corpse_expires = false
   end
 
@@ -32,18 +32,16 @@ end
 ---@param surface LuaSurface
 ---@param extra_options EntityOptions
 ---@param vars VariableValues
----@param prototypes LuaCustomTable<string,LuaEntityPrototype>
-local function spawn_entity(entity, relative_position, center, surface, extra_options, vars, prototypes)
+local function spawn_entity(entity, relative_position, center, surface, extra_options, vars)
   if debug_log then
     log(string.format(
-      "[spawn_entity]: entity[]='%s',relative_position[]='%s',center[]='%s',surface[]='%s',extra_options[]='%s',vars[]='%s',prototypes[]='%s' - CALLED!",
+      "[spawn_entity]: entity[]='%s',relative_position[]='%s',center[]='%s',surface[]='%s',extra_options[]='%s',vars[]='%s' - CALLED!",
       type(entity),
       type(relative_position),
       type(center),
       type(surface),
       type(extra_options),
-      type(vars),
-      type(prototypes)
+      type(vars)
     ))
   end
   if not surface.valid then
@@ -53,8 +51,8 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
   local entity_name = expressions.entity(entity, vars)
   if debug_log then log(string.format("[spawn_entity]: entity_name='%s',entity.name='%s'", entity_name, entity.name)) end
 
-  if not prototypes[entity_name] then
-    log(string.format("[spawn_entity]: entity '%s' does not exist!", entity_name))
+  if _G["prototypes"].entity[entity_name] == nil then
+    log(string.format("[spawn_entity]: entity_name='%s' does not exist!", entity_name))
     return
   end
 
@@ -66,8 +64,8 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
   if debug_log then log(string.format("[spawn_entity]: force='%s' - AFTER!", force)) end
 
   local recipe
-  if debug_log then log(string.format("[spawn_entity]: extra_options.recipe[]='%s'", type(extra_options.recipe))) end
-  if extra_options.recipe then
+  if debug_log then log(string.format("[spawn_entity]: extra_options.recipe='%s'", extra_options.recipe)) end
+  if type(extra_options.recipe) == "string" then
     if not _G["prototypes"].recipe[extra_options.recipe] then
       log(string.format("[spawn_entity]: extra_options.recipe='%s'' does not exist!", extra_options.recipe))
     else
@@ -86,6 +84,7 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
     create_build_effect_smoke = false,
     recipe = recipe
   }
+  if debug_log then log(string.format("[spawn_entity]: Entity created: e.valid='%s'", e.valid)) end
 
   if debug_log then log(string.format("[spawn_entity]: extra_options.dmg[]='%s'", type(extra_options.dmg))) end
   if extra_options.dmg then
@@ -112,9 +111,9 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
       end
     end
 
-    if debug_log then log(string.format("[spawn_entity]: fluids()=%d", #fluids)) end
-    if #fluids > 0 then
-      if debug_log then log(string.format("[spawn_entity]: Safely inserting %d fluids ...", #fluids)) end
+    if debug_log then log(string.format("[spawn_entity]: fluids()=%d", table_size(fluids))) end
+    if table_size(fluids) > 0 then
+      if debug_log then log(string.format("[spawn_entity]: Safely inserting %d fluids ...", table_size(fluids))) end
       utils.safe_insert_fluid(e, fluids)
     end
   end
@@ -129,6 +128,7 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
         log(string.format("[spawn_entity]: item '%s' does not exist!", name))
       else
         local count = expressions.number(count_expression, vars)
+        if debug_log then log(string.format("[spawn_entity]: count=%d", count)) end
         if count > 0 then
           if debug_log then log(string.format("[spawn_entity]: Adding item name='%s',count=%d ...", name, count)) end
           items[name] = count
@@ -137,8 +137,8 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
     end
 
     if debug_log then log(string.format("[spawn_entity]: Found %d items.", #items)) end
-    if not (next(items) == nil) then
-      if debug_log then log(string.format("[spawn_entity]: Safely inserting %d items ...", #items)) end
+    if table_size(items) > 0 then
+      if debug_log then log(string.format("[spawn_entity]: Safely inserting %d items ...", table_size(items))) end
       utils.safe_insert(e, items)
     end
   end
@@ -158,11 +158,9 @@ local function spawn_entities(entities, center, surface, vars)
     error(string.format("[spawn_entities]: surface.name='%s' is not valid", surface.name))
   end
 
-  local prototypes = prototypes.entity
-
   if debug_log then log(string.format("[spawn_entities]: Spawning %d entities on surface.name='%s' ...", #entities, surface.name)) end
   for _, entity_info in pairs(entities) do
-    spawn_entity(entity_info[1], entity_info[2], center, surface, entity_info[3] or {}, vars, prototypes)
+    spawn_entity(entity_info[1], entity_info[2], center, surface, entity_info[3] or {}, vars)
   end
 
   if debug_log then log("[spawn_entities]: EXIT!") end
@@ -210,7 +208,7 @@ end
 ---@return VariableValues
 local function parse_variables(variables)
   if debug_log then log(string.format("[parse_variables]: variables[]='%s' - CALLED!", type(variables))) end
-  if #variables == 0 then
+  if table_size(variables) == 0 then
     error("[parse_variables]: Not parsing an empty variables list!")
   end
 
@@ -230,7 +228,7 @@ local function parse_variables(variables)
     end
   end
 
-  if debug_log then log(string.format("[parse_variables]: parsed()=%d - EXIT!", #parsed)) end
+  if debug_log then log(string.format("[parse_variables]: parsed()=%d - EXIT!", table_size(parsed))) end
   return parsed
 end
 
@@ -255,8 +253,9 @@ local function clear_area(half_size, center, surface)
   end
 
   for _, entity in pairs(surface.find_entities_filtered({area = area, type = {"resource"}, invert = true})) do
-    if debug_log then log(string.format("[clear_area]: entity.type='%s',entity.name='%s'", entity.type, entity.name)) end
+    if debug_log then log(string.format("[clear_area]: entity.type='%s',entity.name='%s',entity.valid='%s'", entity.type, entity.name, entity.valid)) end
     if (entity.valid and entity.type ~= "tree") or math.random() < (half_size / 14) then
+      if debug_log then log(string.format("[clear_area]: Destroying entity.name='%s' ...", entity.name)) end
       entity.destroy({do_cliff_correction = true, raise_destroy = true})
     end
   end
@@ -281,7 +280,7 @@ spawning.spawn_ruin = function(ruin, half_size, center, surface)
     local variables = {}
     if debug_log then log(string.format("[spawn_ruin]: ruin.variables[]='%s'", type(ruin.variables))) end
     if ruin.variables ~= nil then
-      local variables = parse_variables(ruin.variables)
+      variables = parse_variables(ruin.variables)
     end
     if debug_log then log(string.format("[spawn_ruin]: variables[%s]()=%d,ruin.entities[]='%s'", type(variables), #variables, type(ruin.entities))) end
 
