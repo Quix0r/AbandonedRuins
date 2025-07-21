@@ -14,12 +14,10 @@ The settings should be modified in settings.lua. Make sure to set "AbandonedRuin
 
 Add a ruin set name to the setting:
 ```lua
-table.insert(settings.global["current-ruin-set"].allowed_values, "my-ruin-set")
+-- Add this to your init() function in control.lua:
+remote.call("AbandonedRuins", "register_ruin_set", "my-ruin-set", false)
 ```
-Optional: Set the just added ruin set to be selected by default.
-```lua
-data.raw[settings.global["current-ruin-set"].default_value = "my-ruin-set"
-```
+Optional: replace `false` with `true` to mark as default.
 
 ## Step 2: Ruin set remote interface
 
@@ -29,16 +27,19 @@ Some extra care needs to be taken with ruin sets, as they are not save/loaded. T
 For that reason, it is recommended to only add ruin sets in on_init and on_load. Furthermore, it is recommended to not conditionally change ruin sets.
 
 ```lua
-local small_ruins = require("ruins/small") -- an array of ruins
-local medium_ruins = require("ruins/medium") -- an array of ruins
-local large_ruins = require("ruins/large") -- an array of ruins
+local ruin_sets = {
+  small = require("ruins/small") -- an array of ruins
+  medium = require("ruins/medium") -- an array of ruins
+  large = require("ruins/large") -- an array of ruins
+}
 
-local function make_ruin_set()
-  remote.call("AbandonedRuins", "add_ruin_set", "my-ruin-set", small_ruins, medium_ruins, large_ruins)
+local function init()
+  remote.call("AbandonedRuins", "add_ruin_sets", "my-ruin-set", ruin_sets)
 end
 
 -- The ruin set is always created when the game is loaded, since the ruin sets are not save/loaded by AbandonedRuins.
 -- Since this is using on_load, we must be sure that it always produces the same result for everyone.
-script.on_init(make_ruin_set)
-script.on_load(make_ruin_set)
+script.on_init(init)
+script.on_load(init)
 ```
+With `ruin_sets` seperated from function call, you can e.g. modify the entities depending if other mods are installed. For an example clone `AbandonedRuins-base`, too, and study each file carefully.
