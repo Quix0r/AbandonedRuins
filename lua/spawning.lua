@@ -152,7 +152,7 @@ end
 ---@param vars VariableValues
 local function spawn_entities(entities, center, surface, vars)
   if debug_log then log(string.format("[spawn_entities]: entities[]='%s',center[]='%s',surface[]='%s',vars[]='%s' - CALLED!", type(entities), type(center), type(surface), type(vars))) end
-  if #entities == 0 then
+  if table_size(entities) == 0 then
     error(string.format("[spawn_entities]: No entities to spawn on surface.name='%s' - EXIT!", surface.name))
   elseif not surface.valid then
     error(string.format("[spawn_entities]: surface.name='%s' is not valid", surface.name))
@@ -171,19 +171,21 @@ end
 ---@param surface LuaSurface
 local function spawn_tiles(ruin_tiles, center, surface)
   if debug_log then log(string.format("[spawn_tiles]: ruin_tiles[]='%s',center[]='%s',surface[]='%s' - CALLED!", type(ruin_tiles), type(center), type(surface))) end
-  if #ruin_tiles == 0 then
+  if table_size(ruin_tiles) == 0 then
     error("[spawn_tiles]: Cannot spawn empty run_tiles!")
   elseif not surface.valid then
     error(string.format("[spawn_tiles]: surface.name='%s' is not valid", surface.name))
   end
 
   local tiles = {}
+  local count = 0
 
   if debug_log then log(string.format("[spawn_tiles]: Spawning %d tiles on surface.name='%s' ...", #ruin_tiles, surface.name)) end
   for _, tile_spec in pairs(ruin_tiles) do
     if prototypes.tile[tile_spec[1]] then
       if debug_log then log(string.format("[spawn_tiles]: tile_spec[1]='%s',center.x=%d,center.y=%d,tile_spec[2].x=%d,tile_spec[2].y=%d", tile_spec[1], center.x, center.y, tile_spec[2].x, tile_spec[2].y)) end
-      tiles[#tiles + 1] = {
+      count = count + 1
+      tiles[count] = {
         name     = tile_spec[1],
         position = {center.x + tile_spec[2].x, center.y + tile_spec[2].y}
       }
@@ -306,14 +308,14 @@ end
 ---@param surface LuaSurface
 spawning.spawn_random_ruin = function(ruins, half_size, center, surface)
   if debug_log then log(string.format("[spawn_random_ruin]: ruins[]='%s',half_size[]='%s',center[]='%s',surface[]='%s' - CALLED!", type(ruins), type(half_size), type(center), type(surface))) end
-  if #ruins == 0 then
+  if table_size(ruins) == 0 then
     error("[spawn_random_ruin]: Array 'ruins' is empty")
   elseif not surface.valid then
     error(string.format("[spawn_random_ruin]: surface.name='%s' is not valid", surface.name))
   end
 
   --spawn a random ruin from the list
-  spawning.spawn_ruin(ruins[math.random(#ruins)], half_size, center, surface)
+  spawning.spawn_ruin(ruins[math.random(table_size(ruins))], half_size, center, surface)
 
   if debug_log then log("[spawn_random_ruin]: EXIT!") end
 end

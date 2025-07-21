@@ -1,16 +1,27 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.2
+Date: 2025-07-21
+  Changes:
+    - used more `table_size(my_table)` as `#my_table` is undecided size LUA 5.2
+    - added remote-call function `register_ruin_set` for avoiding hard-coded access on writing
+      mod configuration in other mods (lesser porting)
+    - fixed all `default-ruin-set` to `current-ruin-set`
+    - added more debug lines
+    - used counter variable for indexed (numeric) tables
+---------------------------------------------------------------------------------------------------
 Version: 1.3.1
 Date: 2025-07-20
   Changes:
     - fixed bug in `spawn_ruin()` as the keyword `local` was twice, causing the variable's scope
       being intitialized again inside the `if()` block and the outside variable is NOT updated
-    - introduced utils.count() to count any variable's size/length
     - added more debug lines
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.0
 Date: 2025-07-18
   Changes:
     - renamed mod to `AbandonedRuins_updated_fork` done by @Keysivi
+    - renamed settings from `AbandonedRuins-*` to `ruins-*`, `current-ruin-set` is now where other
+      ruin-sets can be added to
     - removed base ruins (duplicated to mod `AbandonedRuins-base`)
     - further rewrites towards `AbandonedRuins_updated_fork` mod
     - excluded my old mod's name

@@ -112,7 +112,7 @@ script.on_event(defines.events.on_tick,
     if not ruins then
       if debug_on_tick then log(string.format("[on_tick]: No ruin queued for event.tick=%d  EXIT!", event.tick)) end
       return
-    elseif #ruins == 0 then
+    elseif table_size(ruins) == 0 then
       log(string.format("[on_tick]: event.tick=%d has empty list set, deleting list ... - EXIT!", event.tick))
       storage.ruin_queue[event.tick] = nil
       return
@@ -214,10 +214,10 @@ script.on_event(defines.events.on_chunk_generated,
 
 script.on_event({defines.events.on_player_selected_area, defines.events.on_player_alt_selected_area}, function(event)
   if debug_log then log("[on_player_selected_area]: event.item='" .. event.item .. "',event.entities()=" .. #event.entities .. " - CALLED!") end
-  if (event.item ~= "AbandonedRuins-claim") then
+  if event.item ~= "AbandonedRuins-claim" then
     if debug_log then log("[on_player_selected_area]: event.item='" .. event.item .. "' is not ruin claim - EXIT!") end
     return
-  elseif (#event.entities == 0) then
+  elseif table_size(event.entities) == 0 then
     if debug_log then log("[on_player_selected_area]: No entities selected - EXIT!") end
     return
   end
@@ -386,6 +386,30 @@ remote.add_interface("AbandonedRuins",
   get_current_ruin_set = function()
     if debug_log then log(string.format("[get_current_ruin_set]: current-ruin-set='%s'", settings.global["current-ruin-set"].value)) end
     return _ruin_sets[settings.global["current-ruin-set"].value]
+  end,
+
+  -- Registers ruin-set name as choosable option and optionally set it as default
+  ---@param name string
+  ---@param is_default boolean
+  register_ruin_set = function(name, is_default)
+    if debug_log then log(string.format("[register_ruin_set]: name[]='%s',is_default='%s' - CALLED!", type(name), is_default)) end
+    if type(name) ~= "string" then
+      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+    elseif type(is_default) ~= "boolean" then
+      error(string.format("is_default[]='%s' is not expected type 'boolean'", type(is_default)))
+    end
+
+    local set = settings.global["current-ruin-set"]
+
+    if is_default then
+      set.default_value = name
+    end
+    if set.allowed_values == nil then
+        -- Initialize with empty list
+        set.allowed_values = {}
+    end
+
+    table.insert(set.allowed_values, name)
   end
 })
 

@@ -3,7 +3,7 @@
 Other mods can add their own ruin sets to *Abandoned Ruins - Updated*.
 
 Typically, a ruin set is added in two steps:
-* Modify the "default-ruin-set" string-setting in the settings stage to add the name of the ruin set.
+* Modify the "current-ruin-set" string-setting in the settings stage to add the name of the ruin set.
 * Add the own ruin set in control.lua via the remote interface.
 
 An "real-life" example for adding a ruin set with another mod can be found at [Abandoned Ruins - Krastorio2](https://github.com/Bilka2/AbandonedRuins-Krastorio2).

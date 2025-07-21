@@ -21,15 +21,17 @@ local common_expressions =
   ---@param vars VariableValues
   ---@return number|string
   ["variable"] = function(t, vars)
+    if debug_log then log(string.format("[variable]: t[]='%s',vars[]='%s' - CALLED!", type(t), type(vars))) end
     if type(t.name) ~= "string" then
       error(string.format("t.name[]='%s' is not expected type 'string'", type(t.name)))
     elseif type(vars) ~= "table" then
        error(string.format("vars[]='%s' is not expected type 'table'", type(vars)))
     end
 
-    if debug_log then log(string.format("[variable]: t.name='%s'", t.name)) end
+    if debug_log then log(string.format("[variable]: Returning vars[%s][]='%s' - EXIT!", t.name, type(vars[t.name]))) end
     return vars[t.name]
   end,
+
   ---@param t NumberExpression|EntityExpression
   ---@param vars VariableValues
   ---@return number|string
@@ -42,6 +44,7 @@ local common_expressions =
 
     return vars[t.variables[math.random(table_size(t.variables))]]
   end,
+
   ---@param t NumberExpression|EntityExpression
   ---@return number|string
   ["random-from-list"] = function(t)
@@ -57,6 +60,7 @@ local number_expressions =
   ---@param t NumberExpression
   ---@return number
   ["random"] = function(t)
+    if debug_log then log(string.format("[random]: t.min=%d,t.max=%d - CALLED!", t.min, t.max)) end
     if t.min < 0 then
       error(string.format("t.min=%d Cannot be below zero", t.min))
     elseif t.max < t.min then
@@ -67,26 +71,29 @@ local number_expressions =
 }
 extend(number_expressions, common_expressions)
 
-
 local entity_expressions =
 {
   ---@param t EntityExpression
   ---@return string
   ["random-of-entity-type"] = function(t)
+    if debug_log then log(string.format("[random-of-entity-type]: t.entity_type='%s' - CALLED!", t.entity_type)) end
     if type(t.entity_type) ~= "string" then
       error("Expression random-of-entity-type: entity_type expected a string, got " .. type(t.entity_type))
     end
     ---@type string[]
     local entities = {}
+    local count = 0
 
     for entity in pairs(prototypes.get_entity_filtered({{filter = "type", type = t.entity_type}})) do
-      entities[#entities + 1] = entity
+      if debug_log then log(string.format("[random-of-entity-type]: entity='%s'", entity)) end
+      count = count + 1
+      entities[count] = entity
     end
-    return entities[math.random(#entities)]
+    if debug_log then log(string.format("[random-of-entity-type]: count=%d", count)) end
+    return entities[math.random(count)]
   end
 }
 extend(entity_expressions, common_expressions)
-
 
 ---@param t NumberExpression|number
 ---@param vars VariableValues
@@ -112,7 +119,7 @@ parsing.number = function(t, vars)
     if debug_log then log(string.format("[number]: t=%.2f - EXIT!", t)) end
     return t
   end
-  error("Received something that is not a number or table as number-expression")
+  error(string.format("[number]: t[]='%s' is not expected type 'number' or 'table'", type(t)))
 end
 
 ---@param t EntityExpression|string
@@ -139,7 +146,7 @@ parsing.entity = function(t, vars)
     if debug_log then log(string.format("[entity]: t='%s' - EXIT!", t)) end
     return t
   end
-  error("Received something that is not an entity or table as entity-expression")
+  error(string.format("[entity]: t[]='%s' is not expected type 'string' or 'table'", type(t)))
 end
 
 return parsing
