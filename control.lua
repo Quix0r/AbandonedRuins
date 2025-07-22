@@ -161,7 +161,11 @@ end
 ---@param tick uint
 local function try_ruin_spawn(size, min_distance, center, surface, tick)
   if debug_log then log(string.format("[try_ruin_spawn]: size='%s',min_distance=%d,center[]='%s',surface[]='%s',tick=%d - CALLED!", size, min_distance, type(center), type(surface), tick)) end
-  if utils.ruin_min_distance_multiplier[size] == nil then
+  if type(size) ~= "string" then
+    error(string.format("[try_ruin_spawn]: size[]='%s' is not expected type 'string'", type(size)))
+  elseif type(min_distance) ~= "number" then
+    error(string.format("[try_ruin_spawn]: min_distance[]='%s' is not expected type 'string'", type(min_distance)))
+  elseif utils.ruin_min_distance_multiplier[size] == nil then
     error(string.format("[try_ruin_spawn]: size='%s' is not found in multiplier table", size))
   end
 
