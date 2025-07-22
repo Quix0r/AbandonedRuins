@@ -52,8 +52,9 @@ local function init_spawn_chances()
     if debug_log then log(string.format("[init_spawn_chances]: thresholds[%s]=%.2f", size, thresholds[size])) end
   end
 
+  if debug_log then log(string.format("[init_spawn_chances]: Adding %d thresholds ...", table_size(thresholds))) end
   for size, threshold in pairs(thresholds) do
-    if debug_log then log(string.format("[init_spawn_chances]: Addding size='%s',threshold=%.2f ...", size, threshold)) end
+    if debug_log then log(string.format("[init_spawn_chances]: Adding/updating size='%s',threshold=%.2f ...", size, threshold)) end
     storage.spawn_chances[size] = threshold
   end
 
@@ -70,12 +71,13 @@ local function init()
   if debug_log then log("[init]: CALLED!") end
   utils.set_enemy_force_cease_fire(utils.get_enemy_force(), not settings.global["ruins-enemy-not-cease-fire"].value)
 
+  -- Initialize spawn changes array (isn't stored in save-game)
   init_spawn_chances()
 
-  if storage.spawn_ruins == nil then
-    storage.spawn_ruins = true
-  end
+  ---@type boolean
+  storage.spawn_ruins = storage.spawn_ruins or true
 
+  ---@type RuinQueueItem[]
   storage.ruin_queue = storage.ruin_queue or {}
 
   if not storage.excluded_surfaces then
