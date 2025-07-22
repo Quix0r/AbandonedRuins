@@ -45,7 +45,8 @@ local function init_spawn_chances()
     if debug_log then log(string.format("[init_spawn_chances]: i=%d,size='%s'", i, size)) end
     thresholds[size] = chances[size]  / sumChance * totalChance
     if i > 1 then
-      thresholds[size] = thresholds[size] + thresholds[ruin_sizes[i]]
+      -- Add threshold of previous ruin size
+      thresholds[size] = thresholds[size] + thresholds[ruin_sizes[i - 1]]
     end
     if debug_log then log(string.format("[init_spawn_chances]: thresholds[%s]=%.2f", size, thresholds[size])) end
   end
@@ -205,6 +206,9 @@ script.on_event(defines.events.on_chunk_generated,
       if spawn_chance <= storage.spawn_chances[size] then
         if debug_log then log(string.format("[on_chunk_generated]: Trying to spawn ruin of size='%s' at event.surface='%s' ...", size, event.surface)) end
         try_ruin_spawn(size, min_distance, center, event.surface, event.tick)
+
+        if debug_log then log("[on_chunk_generated]: BREAK!") end
+        break
       end
     end
 
@@ -400,15 +404,21 @@ remote.add_interface("AbandonedRuins",
     end
 
     local set = settings.global["current-ruin-set"]
+    if debug_log then log(string.format("[register_ruin_set]: set[]='%s'", type(set))) end
 
     if is_default then
+      if debug_log then log(string.format("[register_ruin_set]: Setting name='%s' as default ...", name)) end
       set.default_value = name
     end
-    if set.allowed_values == nil then
-        -- Initialize with empty list
-        set.allowed_values = {}
+
+    if debug_log then log(string.format("[register_ruin_set]: set.allowed_values[]='%s'", type(set.allowed_values))) end
+    if type(set.allowed_values) == "nil" then
+        -- Initialize with "base" in it
+        if debug_log then log("[register_ruin_set]: Initializing allowed_values with 'base' ruin-set ...") end
+        set.allowed_values = {"base"}
     end
 
+    if debug_log then log(string.format("[register_ruin_set]: Adding name='%s' to allowed values (%d now) ...", name, #set.allowed_values)) end
     table.insert(set.allowed_values, name)
   end
 })
@@ -418,8 +428,8 @@ remote.add_interface("AbandonedRuins",
 
   Example:
 
-  script.on_load(function()
-    if script.active_mods["AbandonedRuins"] then
+  local init = function ()
+    if script.active_mods["AbandonedRuins_updated_fork"] then
       script.on_event(remote.call("AbandonedRuins", "get_on_entity_force_changed_event"),
       ---@param event on_entity_force_changed_event_data
       function(event)
@@ -431,21 +441,9 @@ remote.add_interface("AbandonedRuins",
         game.print("old: " .. old_force.name .. " new: " .. new_force.name)
       end)
     end
-  end)
+  end
 
-  script.on_init(function()
-    if script.active_mods["AbandonedRuins"] then
-      script.on_event(remote.call("AbandonedRuins", "get_on_entity_force_changed_event"),
-      ---@param event on_entity_force_changed_event_data
-      function(event)
-        -- An entity changed force, let's handle that
-        local entity = event.entity
-        local old_force = event.force
-        local new_force = entity.force
-        -- handle the force change
-        game.print("old: " .. old_force.name .. " new: " .. new_force.name)
-      end)
-    end
-  end)
+  script.on_load(init)
+  script.on_init(init)
 
 --]]

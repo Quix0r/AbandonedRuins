@@ -249,13 +249,13 @@ local function clear_area(half_size, center, surface)
   local area = utils.area_from_center_and_half_size(half_size, center)
 
   -- exclude tiles that we shouldn't spawn on
-  if surface.count_tiles_filtered{ area = area, limit = 1, collision_mask = { item = true, object = true, water_tile = true } } == 1 then
+  if surface.count_tiles_filtered({area = area, limit = 1, collision_mask = {item = true, object = true, water_tile = true}}) == 1 then
     if debug_log then log(string.format("[clear_area]: surface.name='%s' has excluded tile - EXIT!", surface.name)) end
     return false
   end
 
   for _, entity in pairs(surface.find_entities_filtered({area = area, type = {"resource"}, invert = true})) do
-    if debug_log then log(string.format("[clear_area]: entity.type='%s',entity.name='%s',entity.valid='%s'", entity.type, entity.name, entity.valid)) end
+    if debug_log then log(string.format("[clear_area]: entity.valid='%s'", entity.valid)) end
     if (entity.valid and entity.type ~= "tree") or math.random() < (half_size / 14) then
       if debug_log then log(string.format("[clear_area]: Destroying entity.name='%s' ...", entity.name)) end
       entity.destroy({do_cliff_correction = true, raise_destroy = true})
