@@ -1,4 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.7
+Date: 2025-07-22
+  Rewrites:
+    - some ruins might contain only tiles to spawn (e.g. `heart.lua` in "base"). They are now
+      correctly spawned (thanks to @Silly_Warlock for reporting this)
+    - only invoke `spawn_entities()` when there is something to spawn
+  Minor:
+    - `spawn_ruin()`: logged amount of variables about to be parsed, entities and tiles about
+      to be spawned
+    - logging `table_size(ruin.entities)` might crash the game as it might be `nil` again
+---------------------------------------------------------------------------------------------------
 Version: 1.3.6
 Date: 2025-07-22
   Bugfix for bugfix:

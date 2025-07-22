@@ -285,21 +285,23 @@ spawning.spawn_ruin = function(ruin, half_size, center, surface)
   if clear_area(half_size, center, surface) then
     local variables = {}
     if debug_log then log(string.format("[spawn_ruin]: ruin.variables[]='%s'", type(ruin.variables))) end
-    if ruin.variables ~= nil then
+    if ruin.variables ~= nil and table_size(ruin.variables) > 0 then
+      if debug_log then log(string.format("[spawn_ruin]: Ruin has %d variables to parse.", table_size(ruin.variables))) end
       variables = parse_variables(ruin.variables)
     end
-    if debug_log then log(string.format("[spawn_ruin]: variables[%s]()=%d,ruin.entities[]='%s'", type(variables), #variables, type(ruin.entities))) end
+    if debug_log then log(string.format("[spawn_ruin]: variables()=%d,ruin.entities[]='%s'", table_size(variables), type(ruin.entities))) end
 
-    if ruin.entities == nil then
-      game.print(string.format("Won't spawn a ruin at '%s' as no entities are included. Please report this to your ruin-set developer!", surface.name))
-      return
+    if ruin.entities ~= nil and table_size(ruin.entities) > 0 then
+      if debug_log then log(string.format("[spawn_ruin]: Ruin has %d entities to spawn.", table_size(ruin.entities))) end
+      spawn_entities(ruin.entities, center, surface, variables)
     end
-    spawn_entities(ruin.entities, center, surface, variables)
 
     if debug_log then log(string.format("[spawn_ruin]: ruin.tiles[]='%s'", type(ruin.tiles))) end
-    if ruin.tiles ~= nil then
+    if ruin.tiles ~= nil and table_size(ruin.tiles) > 0 then
+      if debug_log then log(string.format("[spawn_ruin]: Ruin has %d tiles to spawn.", table_size(ruin.tiles))) end
       spawn_tiles(ruin.tiles, center, surface)
     end
+
     no_corpse_fade(half_size, center, surface)
   end
 
