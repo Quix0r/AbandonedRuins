@@ -5,16 +5,16 @@ local util = {}
 
 util.ruin_half_sizes =
 {
-  small = 8 / 2,
+  small  = 8 / 2,
   medium = 16 / 2,
-  large = 32 / 2
+  large  = 32 / 2
 }
 
 util.ruin_min_distance_multiplier =
 {
-  small = 1,
+  small  = 1,
   medium = 2.5,
-  large = 5
+  large  = 5
 }
 
 util.debugprint = __DebugAdapter and __DebugAdapter.print or function() end
@@ -79,6 +79,8 @@ util.safe_damage = function(entity, damage_info, damage_amount)
   if not (entity and entity.valid) then
     log(string.format("[safe_damage]: entity[]='%s' is not valid!", type(entity)))
     return
+  elseif type(damage_amount) ~= "number" then
+    error(string.format("[safe_damage]: damage_amount[]='%s' is not expected type 'number'", type(damage_amount)))
   end
 
   entity.damage(damage_amount, damage_info.force or "neutral", damage_info.type or "physical")
@@ -90,6 +92,8 @@ util.safe_die = function(entity, chance)
   if not (entity and entity.valid) then
     log(string.format("[safe_damage]: entity[]='%s' is not valid!", type(entity)))
     return
+  elseif type(chance) ~= "number" then
+    error(string.format("[safe_damage]: chance[]='%s' is not expected type 'number'", type(chance)))
   end
 
   if math.random() <= chance then
@@ -98,6 +102,8 @@ util.safe_die = function(entity, chance)
 end
 
 -- Set cease_fire status for all forces.
+---@param enemy_force LuaForce
+---@param cease_fire boolean
 util.set_enemy_force_cease_fire = function(enemy_force, cease_fire)
   for _, force in pairs(game.forces) do
     if force ~= enemy_force then
@@ -108,6 +114,8 @@ util.set_enemy_force_cease_fire = function(enemy_force, cease_fire)
 end
 
 -- Set cease_fire status for all forces and friend = true for all biter forces.
+---@param enemy_force LuaForce
+---@param cease_fire boolean
 util.set_enemy_force_diplomacy = function(enemy_force, cease_fire)
   for _, force in pairs(game.forces) do
     if force.ai_controllable then
@@ -119,6 +127,8 @@ util.set_enemy_force_diplomacy = function(enemy_force, cease_fire)
   util.set_enemy_force_cease_fire(enemy_force, cease_fire)
 end
 
+-- Setups configured enemy force and returns it
+---@return LuaForce
 local function setup_enemy_force()
   local enemy_force = game.forces["AbandonedRuins:enemy"] or game.create_force("AbandonedRuins:enemy")
 
@@ -128,6 +138,8 @@ local function setup_enemy_force()
   return enemy_force
 end
 
+-- Safely returns "cached" enemy force or sets it up if not present
+---@return LuaForce
 util.get_enemy_force = function()
   if (storage.enemy_force and storage.enemy_force.valid) then
     return storage.enemy_force
@@ -137,6 +149,8 @@ util.get_enemy_force = function()
 end
 
 -- "Registers" this ruin set's name to the selection box
+---@param name string
+---@param is_default boolean
 util.register_ruin_set = function(name, is_default)
   if type(name) ~= "string" then
     error(string.format("name[]='%s' is not expected type 'string'", type(name)))

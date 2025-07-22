@@ -206,7 +206,7 @@ script.on_event(defines.events.on_chunk_generated,
     local center       = utils.get_center_of_chunk(event.position)
     local min_distance = settings.global["ruins-min-distance-from-spawn"].value
     local spawn_chance = math.random()
-    if debug_log then log(string.format("[on_chunk_generated]: center.x=%d,center.y=%d,min_distance=%d,spawn_chance=%0.f", center.x, center.y, min_distance, spawn_chance)) end
+    if debug_log then log(string.format("[on_chunk_generated]: center.x=%d,center.y=%d,min_distance=%d,spawn_chance=%2.f", center.x, center.y, min_distance, spawn_chance)) end
 
     for _, size in pairs(ruin_sizes) do
       if debug_log then log(string.format("[on_chunk_generated]: spawn_chances[%s]=%.2f,spawn_chance=%.2f", size, storage.spawn_chances[size], spawn_chance)) end
@@ -224,26 +224,28 @@ script.on_event(defines.events.on_chunk_generated,
 )
 
 script.on_event({defines.events.on_player_selected_area, defines.events.on_player_alt_selected_area}, function(event)
-  if debug_log then log("[on_player_selected_area]: event.item='" .. event.item .. "',event.entities()=" .. #event.entities .. " - CALLED!") end
+  if debug_log then log(string.format("[on_player_selected_area]: event.item='%s',event.entities()=%d - CALLED!", event.item, table_size(event.entities))) end
   if event.item ~= "AbandonedRuins-claim" then
-    if debug_log then log("[on_player_selected_area]: event.item='" .. event.item .. "' is not ruin claim - EXIT!") end
+    if debug_log then log(string.format("[on_player_selected_area]: event.item='%s' is not ruin claim - EXIT!", event.item)) end
     return
   elseif table_size(event.entities) == 0 then
     if debug_log then log("[on_player_selected_area]: No entities selected - EXIT!") end
     return
   end
 
+  ---@type LuaForce
   local neutral_force = game.forces.neutral
+  ---@type LuaForce
   local claimants_force = game.get_player(event.player_index).force
-  if debug_log then log("[on_player_selected_area]: neutral_force='" .. tostring(neutral_force) .. "',claimants_force='" .. tostring(claimants_force) .. "'") end
+  if debug_log then log(string.format("[on_player_selected_area]: neutral_force='%s',claimants_force='%s'", tostring(neutral_force), tostring(claimants_force))) end
 
   for _, entity in pairs(event.entities) do
-    if debug_log then log("[on_player_selected_area]:entity.valid='" .. tostring(entity.valid) .. "',entity.force='" .. tostring(entity.force) .. "'") end
+    if debug_log then log(string.format("[on_player_selected_area]:entity.valid='%s',entity.force='%s'", entity.valid, tostring(entity.force))) end
     if entity.valid and entity.force == neutral_force then
-      if debug_log then log("[on_player_selected_area]:Setting entity.force='" .. tostring(claimants_force) .. "' ...") end
+      if debug_log then log(string.format("[on_player_selected_area]:Setting entity.force='%s' ...", tostring(claimants_force))) end
       entity.force = claimants_force
 
-      if debug_log then log("[on_player_selected_area]:entity.valid='" .. tostring(entity.valid) .. "'") end
+      if debug_log then log(string.format("[on_player_selected_area]:entity.valid='%s'", tostring(entity.valid))) end
       if entity.valid then
         script.raise_event(on_entity_force_changed_event, {entity = entity, force = neutral_force})
       end
@@ -343,6 +345,8 @@ remote.add_interface("AbandonedRuins",
     if debug_log then log(string.format("[add_ruin_sets]: name[]='%s',ruin_sets[]='%s' - CALLED!", type(name), type(ruin_sets))) end
     if type(name) ~= "string" then
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+    elseif type(ruin_sets) ~= "table" then
+      error(string.format("ruin_sets[]='%s' is not expected type 'table'", type(ruin_sets)))
     end
 
     if debug_log then log(string.format("[add_ruin_sets]: Setting name='%s' ruin sets ...", name)) end
@@ -388,7 +392,7 @@ remote.add_interface("AbandonedRuins",
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     end
 
-    if debug_log then log(string.format("[get_ruin_set]: Returining ruin set for name='%s' - EXIT!", name)) end
+    if debug_log then log(string.format("[get_ruin_set]: _ruin_sets[%s][]='%s' - EXIT!", name, type(_ruin_sets[name]))) end
     return _ruin_sets[name]
   end,
 
