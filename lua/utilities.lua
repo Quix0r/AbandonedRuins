@@ -1,3 +1,4 @@
+local constants = require("constants")
 local core_utils = require("__core__/lualib/util")
 
 local util = {}
@@ -133,6 +134,26 @@ util.get_enemy_force = function()
   end
 
   return setup_enemy_force()
+end
+
+-- "Registers" this ruin set's name to the selection box
+util.register_ruin_set = function(name, is_default)
+  if type(name) ~= "string" then
+    error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+  elseif type(is_default) ~= "boolean" then
+    error(string.format("is_default[]='%s' is not expected type 'boolean'", type(is_default)))
+  end
+
+  -- First get settings
+  local set = settings.global[constants.CURRENT_RUIN_SET_KEY]
+
+  -- Add this ruin set's name to it
+  table.insert(set.allowed_values, name)
+
+  -- Set it as default
+  if is_default then
+    set.default_value = name
+  end
 end
 
 return util

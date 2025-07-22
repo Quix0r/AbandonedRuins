@@ -1,4 +1,4 @@
-local util = require("__AbandonedRuins_updated_fork__/lua/utilities")
+local utils = require("__AbandonedRuins_updated_fork__/lua/utilities")
 local spawning = require("__AbandonedRuins_updated_fork__/lua/spawning")
 
 -- Debugging world
@@ -81,10 +81,10 @@ script.on_event(defines.events.on_player_created, function(event)
 
   for size, ruin_list in pairs(ruin_set) do
     for _, ruin in pairs(ruin_list) do
-      local center = util.get_center_of_chunk({x = x, y = y})
+      local center = utils.get_center_of_chunk({x = x, y = y})
 
-      spawning.spawn_ruin(ruin, util.ruin_half_sizes[size], center, surface)
-      draw_dimensions(center, util.ruin_half_sizes[size], surface)
+      spawning.spawn_ruin(ruin, utils.ruin_half_sizes[size], center, surface)
+      draw_dimensions(center, utils.ruin_half_sizes[size], surface)
 
       x = x + 1
       if (x >= chunk_radius) then

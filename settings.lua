@@ -1,3 +1,5 @@
+local constants = require("lua/constants")
+
 data:extend({
   {
     type = "bool-setting",
@@ -58,7 +60,7 @@ data:extend({
   },
   {
     type = "string-setting",
-    name = "current-ruin-set",
+    name = constants.CURRENT_RUIN_SET_KEY,
     setting_type = "runtime-global",
     allowed_values = {"base"},
     default_value = "base",

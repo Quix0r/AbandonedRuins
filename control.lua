@@ -1,5 +1,6 @@
-local util = require("__AbandonedRuins_updated_fork__/lua/utilities")
-local spawning = require("__AbandonedRuins_updated_fork__/lua/spawning")
+local constants = require("lua/constants")
+local utils = require("lua/utilities")
+local spawning = require("lua/spawning")
 
 debug_log = settings.global["ruins-enable-debug-log"].value
 debug_on_tick = settings.global["ruins-enable-debug-on-tick"].value
@@ -67,7 +68,7 @@ end
 
 local function init()
   if debug_log then log("[init]: CALLED!") end
-  util.set_enemy_force_cease_fire(util.get_enemy_force(), not settings.global["ruins-enemy-not-cease-fire"].value)
+  utils.set_enemy_force_cease_fire(utils.get_enemy_force(), not settings.global["ruins-enemy-not-cease-fire"].value)
 
   init_spawn_chances()
 
@@ -98,7 +99,7 @@ script.on_event(defines.events.on_runtime_mod_setting_changed, init)
 script.on_event(defines.events.on_force_created,
   function()
     -- Sets up the diplomacy for all forces, not just the newly created one.
-    util.set_enemy_force_diplomacy(util.get_enemy_force(), not settings.global["ruins-enemy-not-cease-fire"].value)
+    utils.set_enemy_force_diplomacy(utils.get_enemy_force(), not settings.global["ruins-enemy-not-cease-fire"].value)
   end
 )
 
@@ -122,7 +123,7 @@ script.on_event(defines.events.on_tick,
     if debug_on_tick then log(string.format("[on_tick]: Spawning %d random ruin sets ...", #ruins)) end
     for _, ruin in pairs(ruins) do
       if debug_on_tick then log(string.format("[on_tick]: Spawning ruin.size='%s',ruin.center='%s',ruin.surface='%s' ...", ruin.size, tostring(ruin.center), tostring(ruin.surface))) end
-      spawning.spawn_random_ruin(_ruin_sets[settings.global["current-ruin-set"].value][ruin.size], util.ruin_half_sizes[ruin.size], ruin.center, ruin.surface)
+      spawning.spawn_random_ruin(_ruin_sets[settings.global[constants.CURRENT_RUIN_SET_KEY].value][ruin.size], utils.ruin_half_sizes[ruin.size], ruin.center, ruin.surface)
     end
 
     if debug_on_tick then log(string.format("[on_tick]: Deleting ruin(s) on event.tick=%d ...", event.tick)) end
@@ -158,11 +159,11 @@ end
 ---@param tick uint
 local function try_ruin_spawn(size, min_distance, center, surface, tick)
   if debug_log then log(string.format("[try_ruin_spawn]: size='%s',min_distance=%d,center[]='%s',surface[]='%s',tick=%d - CALLED!", size, min_distance, type(center), type(surface), tick)) end
-  if util.ruin_min_distance_multiplier[size] == nil then
+  if utils.ruin_min_distance_multiplier[size] == nil then
     error(string.format("[try_ruin_spawn]: size='%s' is not found in multiplier table", size))
   end
 
-  min_distance = min_distance * util.ruin_min_distance_multiplier[size]
+  min_distance = min_distance * utils.ruin_min_distance_multiplier[size]
   if debug_log then log(string.format("[try_ruin_spawn]: min_distance=%d", min_distance)) end
 
   if math.abs(center.x) < min_distance and math.abs(center.y) < min_distance then
@@ -171,7 +172,7 @@ local function try_ruin_spawn(size, min_distance, center, surface, tick)
   end
 
   -- random variance so they aren't always chunk aligned
-  local variance = -(util.ruin_half_sizes[size] * 0.75) + 12 -- 4 -> 9, 8 -> 6, 16 -> 0. Was previously 4 -> 10, 8 -> 5, 16 -> 0
+  local variance = -(utils.ruin_half_sizes[size] * 0.75) + 12 -- 4 -> 9, 8 -> 6, 16 -> 0. Was previously 4 -> 10, 8 -> 5, 16 -> 0
   if debug_log then log(string.format("[try_ruin_spawn]: variance=%.2f,center.x=%d,center.y=%d - BEFORE!", variance, center.x, center.y)) end
   if variance > 0 then
     if debug_log then log(string.format("[try_ruin_spawn]: Applying random variance=%.2f ...", variance)) end
@@ -191,12 +192,12 @@ script.on_event(defines.events.on_chunk_generated,
     if storage.spawn_ruins == false then
       if debug_log then log("[on_chunk_generated]: Spawning ruins is disabled by configuration - EXIT!") end
       return
-    elseif util.str_contains_any_from_table(event.surface.name, storage.excluded_surfaces) then
+    elseif utils.str_contains_any_from_table(event.surface.name, storage.excluded_surfaces) then
       if debug_log then log(string.format("[on_chunk_generated]: event.surface.name='%s' is excluded - EXIT!", event.surface.name)) end
       return
     end
 
-    local center       = util.get_center_of_chunk(event.position)
+    local center       = utils.get_center_of_chunk(event.position)
     local min_distance = settings.global["ruins-min-distance-from-spawn"].value
     local spawn_chance = math.random()
     if debug_log then log(string.format("[on_chunk_generated]: center.x=%d,center.y=%d,min_distance=%d,spawn_chance=%0.f", center.x, center.y, min_distance, spawn_chance)) end
@@ -328,7 +329,7 @@ remote.add_interface("AbandonedRuins",
 
   -- !! ALWAYS call this in on_load and on_init. !!
   -- !! The ruins sets are not saved or loaded. !!
-  -- The ruins should have the sizes given in util.ruin_half_sizes, e.g. ruins in the small_ruins array should be 8x8 tiles.
+  -- The ruins should have the sizes given in utils.ruin_half_sizes, e.g. ruins in the small_ruins array should be 8x8 tiles.
   -- See also: docs/ruin_sets.md
   ---@param name string
   ---@param ruin_sets table<string, Ruins[]>
@@ -346,7 +347,7 @@ remote.add_interface("AbandonedRuins",
 
   -- !! ALWAYS call this in on_load and on_init. !!
   -- !! The ruins sets are not saved or loaded. !!
-  -- The ruins should have the sizes given in util.ruin_half_sizes, e.g. ruins in the small_ruins array should be 8x8 tiles.
+  -- The ruins should have the sizes given in utils.ruin_half_sizes, e.g. ruins in the small_ruins array should be 8x8 tiles.
   -- See also: docs/ruin_sets.md
   ---@param name string
   ---@param small_ruins Ruin[]
@@ -388,39 +389,9 @@ remote.add_interface("AbandonedRuins",
   -- Returns a table with: {<size> = {<array of ruins>}, <size-n> = {<array of ruins>}}}
   ---@return RuinSet
   get_current_ruin_set = function()
-    if debug_log then log(string.format("[get_current_ruin_set]: current-ruin-set='%s'", settings.global["current-ruin-set"].value)) end
-    return _ruin_sets[settings.global["current-ruin-set"].value]
+    if debug_log then log(string.format("[get_current_ruin_set]: current-ruin-set='%s'", settings.global[constants.CURRENT_RUIN_SET_KEY].value)) end
+    return _ruin_sets[settings.global[constants.CURRENT_RUIN_SET_KEY].value]
   end,
-
-  -- Registers ruin-set name as choosable option and optionally set it as default
-  ---@param name string
-  ---@param is_default boolean
-  register_ruin_set = function(name, is_default)
-    if debug_log then log(string.format("[register_ruin_set]: name[]='%s',is_default='%s' - CALLED!", type(name), is_default)) end
-    if type(name) ~= "string" then
-      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
-    elseif type(is_default) ~= "boolean" then
-      error(string.format("is_default[]='%s' is not expected type 'boolean'", type(is_default)))
-    end
-
-    local set = settings.global["current-ruin-set"]
-    if debug_log then log(string.format("[register_ruin_set]: set[]='%s'", type(set))) end
-
-    if is_default then
-      if debug_log then log(string.format("[register_ruin_set]: Setting name='%s' as default ...", name)) end
-      set.default_value = name
-    end
-
-    if debug_log then log(string.format("[register_ruin_set]: set.allowed_values[]='%s'", type(set.allowed_values))) end
-    if type(set.allowed_values) == "nil" then
-        -- Initialize with "base" in it
-        if debug_log then log("[register_ruin_set]: Initializing allowed_values with 'base' ruin-set ...") end
-        set.allowed_values = {"base"}
-    end
-
-    if debug_log then log(string.format("[register_ruin_set]: Adding name='%s' to allowed values (%d now) ...", name, #set.allowed_values)) end
-    table.insert(set.allowed_values, name)
-  end
 })
 
 --[[ How to: Subscribe to mod events

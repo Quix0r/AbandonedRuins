@@ -1,6 +1,13 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.3
 Date: 2025-07-22
+  Features:
+    - moved `register_ruin_set()` from non-working `remote.call()` to `lua/utilities.lua`.
+      You now have to "include" that script instead. See mod `realistic-ruins-updated` for
+      an example.
+  Documentation:
+    - moved `format.md` to `AbandonedRuins-base` as that is the proper place it
+    - updated other documentation files for reflecting the split of the mods
   Bugfixes:
     - Need to add previous size's threshold, not current again (thanks to @Silly_Warlock for
       reporting this
