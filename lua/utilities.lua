@@ -145,7 +145,7 @@ util.register_ruin_set = function(name, is_default)
   end
 
   -- First get settings
-  local set = settings.global[constants.CURRENT_RUIN_SET_KEY]
+  local set = data.raw["string-setting"][constants.CURRENT_RUIN_SET_KEY]
 
   -- Add this ruin set's name to it
   table.insert(set.allowed_values, name)

@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.4
+Date: 2025-07-22
+  Bugfixes:
+    - `settings.global` isn't available during "settings" phase, it has to be
+      `data.raw["string-setting"]` for `current-ruin-set` setting.
+    - entities need to be destroyed regardless if they are valid or not
+    - still logging an invalid entity isn't possible, so logging needs to distinguish this
+---------------------------------------------------------------------------------------------------
 Version: 1.3.3
 Date: 2025-07-22
   Features:

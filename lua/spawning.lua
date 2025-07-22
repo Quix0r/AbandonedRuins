@@ -255,9 +255,13 @@ local function clear_area(half_size, center, surface)
   end
 
   for _, entity in pairs(surface.find_entities_filtered({area = area, type = {"resource"}, invert = true})) do
-    if debug_log then log(string.format("[clear_area]: entity.valid='%s'", entity.valid)) end
-    if (entity.valid and entity.type ~= "tree") or math.random() < (half_size / 14) then
-      if debug_log then log(string.format("[clear_area]: Destroying entity.name='%s' ...", entity.name)) end
+    if debug_log and not entity.valid then log("[clear_area]: Found an invalid entity ...") end
+    if debug_log and entity.valid then log(string.format("[clear_area]: Found entity.type='%s',entity.name='%s' ...", entity.type, entity.name)) end
+
+    if entity.type ~= "tree" or math.random() < (half_size / 14) then
+      if debug_log and not entity.valid then log("[clear_area]: Destroying invalid  ...") end
+      if debug_log and entity.valid then log(string.format("[clear_area]: Destroying entity.name='%s' ...", entity.name)) end
+
       entity.destroy({do_cliff_correction = true, raise_destroy = true})
     end
   end
