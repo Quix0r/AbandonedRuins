@@ -5,7 +5,7 @@ local util = {}
 
 util.ruin_half_sizes =
 {
-  small  = 8 / 2,
+  small  = 8  / 2,
   medium = 16 / 2,
   large  = 32 / 2
 }
@@ -135,6 +135,7 @@ end
 -- Setups configured enemy force and returns it
 ---@return LuaForce
 local function setup_enemy_force()
+  ---@type LuaForce
   local enemy_force = game.forces["AbandonedRuins:enemy"] or game.create_force("AbandonedRuins:enemy")
 
   util.set_enemy_force_diplomacy(enemy_force, false)
