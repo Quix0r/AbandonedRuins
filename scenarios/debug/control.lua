@@ -1,8 +1,6 @@
+local constants = require("__AbandonedRuins_updated_fork__/lua/constants")
 local utils = require("__AbandonedRuins_updated_fork__/lua/utilities")
 local spawning = require("__AbandonedRuins_updated_fork__/lua/spawning")
-
--- Debugging world
-local SURFACE_NAME = "debug-ruins"
 
 -- Enable debug log by default
 settings.global["ruins-enable-debug-log"].value = true
@@ -64,7 +62,7 @@ script.on_event(defines.events.on_player_created, function(event)
     }
   }
 
-  local surface = game.create_surface(SURFACE_NAME, mgs)
+  local surface = game.create_surface(constants.DEBUG_SURFACE_NAME, mgs)
 
   -- skip invalid surfaces
   if not surface.valid then
@@ -98,7 +96,7 @@ script.on_event(defines.events.on_player_created, function(event)
   local player = game.get_player(event.player_index)
   player.toggle_map_editor()
   game.tick_paused = false
-  player.teleport({0, 0}, SURFACE_NAME)
+  player.teleport({0, 0}, constants.DEBUG_SURFACE_NAME)
   player.force = "neutral"
   player.game_view_settings.show_entity_info = true
 end)

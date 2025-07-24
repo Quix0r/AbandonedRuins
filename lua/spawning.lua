@@ -1,5 +1,6 @@
-local utils = require("__AbandonedRuins_updated_fork__/lua/utilities")
-local expressions = require("__AbandonedRuins_updated_fork__/lua/expression_parsing")
+local constants = require("constants")
+local utils = require("utilities")
+local expressions = require("lua/expression_parsing")
 
 local spawning = {}
 
@@ -280,6 +281,8 @@ spawning.spawn_ruin = function(ruin, half_size, center, surface)
     error(string.format("[spawn_ruin]: Unexpected value half_size=%d, must be positive", half_size))
   elseif not surface.valid then
     error(string.format("[spawn_ruin]: surface.name='%s' is not valid", surface.name))
+  elseif surface.name ~= constants.DEBUG_SURFACE_NAME and ruin.spawn_on_surfaces ~= nil and ruin.spawn_on_surfaces[surface.name] == nil then
+    error(string.format("[spawn_ruin]: surface.name='%s' is not allowed to spawn this ruin", surface.name))
   end
 
   if clear_area(half_size, center, surface) then
@@ -318,10 +321,31 @@ spawning.spawn_random_ruin = function(ruins, half_size, center, surface)
     error("[spawn_random_ruin]: Array 'ruins' is empty")
   elseif not surface.valid then
     error(string.format("[spawn_random_ruin]: surface.name='%s' is not valid", surface.name))
+  elseif surface.name == constants.DEBUG_SURFACE_NAME then
+    error(string.format("[spawn_random_ruin]: Debug surface '%s' has no random ruin spawning.", surface.name))
   end
 
-  --spawn a random ruin from the list
-  spawning.spawn_ruin(ruins[math.random(table_size(ruins))], half_size, center, surface)
+  ---@type Ruin
+  local ruin = nil
+  ---@type uint
+  local size = table_size(ruins)
+
+  -- Spawn a random ruin from the list
+  while ruin == nil do
+    ruin = ruins[math.random(size)]
+    local name = utils.get_ruin_name(ruin)
+
+    if debug_log then log(string.format("[spawn_random_ruin]: name='%s',ruin.spawn_on_surfaces[]='%s'", name, type(ruin.spawn_on_surfaces))) end
+    if ruin.spawn_on_surfaces ~= nil and (ruin.spawn_on_surfaces[surface.name] == nil or not ruin.spawn_on_surfaces[surface.name]) then
+      -- Ruin is not allowed on this surface
+      if debug_log then log(string.format("[spawn_random_ruin]: Ruin '%s' is not allowed to spawn on surface '%s' - SKIPPED!", name, surface.name)) end
+      ruin = nil
+    else
+      -- Spawn ruin
+      if debug_log then log(string.format("[spawn_random_ruin]: Spawning ruin '%s' at surface '%s' ...", name, surface.name)) end
+      spawning.spawn_ruin(ruin, half_size, center, surface)
+    end
+  end
 
   if debug_log then log("[spawn_random_ruin]: EXIT!") end
 end

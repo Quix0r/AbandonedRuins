@@ -36,11 +36,16 @@ end
 ---@param needles table<string, boolean> The boolean should always be true, it is ignored.
 ---@return boolean @True if the haystack contains at least one of the needles from the table
 util.str_contains_any_from_table = function(haystack, needles)
+  if debug_log then log(string.format("[str_contains_any_from_table]: haystack='%s',needles[]='%s' - CALLED!", haystack, type(needles))) end
   for needle in pairs(needles) do
+    if debug_log then log(string.format("[str_contains_any_from_table]: haystack='%s',needle='%s'", haystack, needle)) end
     if haystack:find(needle, 1, true) then -- plain find, no pattern
+      if debug_log then log(string.format("[str_contains_any_from_table]: Found needle='%s' - EXIT!", needle)) end
       return true
     end
   end
+
+  if debug_log then log(string.format("[str_contains_any_from_table]: haystack='%s' does not contain any needles - EXIT!", haystack)) end
   return false
 end
 
@@ -168,6 +173,19 @@ util.register_ruin_set = function(name, is_default)
   if is_default then
     set.default_value = name
   end
+end
+
+-- Returns "unknown" if optional (but recommended) table key `name` isn't found or otherwise it returns that key's value
+---@param ruin Ruin
+---@return string
+util.get_ruin_name = function(ruin)
+  local name = "unknown"
+
+  if type(ruin.name) == "string" then
+    name = ruin.name
+  end
+
+  return ruin
 end
 
 return util
