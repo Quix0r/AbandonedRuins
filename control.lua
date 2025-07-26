@@ -377,8 +377,6 @@ remote.add_interface("AbandonedRuins",
     if debug_log then log("[add_ruin_sets]: EXIT!") end
   end,
 
-  -- !! ALWAYS call this in on_load and on_init. !!
-  -- !! The ruins sets are not saved or loaded. !!
   -- The ruins should have the sizes given in utils.ruin_half_sizes, e.g. ruins in the small_ruins array should be 8x8 tiles.
   -- See also: docs/ruin_sets.md
   ---@param name string
@@ -386,7 +384,7 @@ remote.add_interface("AbandonedRuins",
   ---@param medium_ruins Ruin[]
   ---@param large_ruins Ruin[]
   add_ruin_set = function(name, small_ruins, medium_ruins, large_ruins)
-    log("[add_ruin_set]: DEPECATED! This function only allows 'small', 'medium' and 'large'. Please use add_ruin_sets() instead!")
+    log(string.format("[add_ruin_set]: DEPECATED! This function only allows 'small', 'medium' and 'large'. Please use add_ruin_sets() instead! name='%s'", name))
     if type(name) ~= "string" then
       error(string.format("[add_ruin_set]: name[]='%s' is not expected type 'string'", type(name)))
     elseif not (small_ruins and next(small_ruins)) then
