@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.11
+Date: 2025-07-27
+  Bugfixes:
+    - moved `excluded_surfaces` to temporary local variable, it shouldn't be persisted or else
+      I cannot add new internal surfaces easily.
+    - added more checks on array elements to avoid crashes with `?` and `nil` only which are
+      hard to debug
+---------------------------------------------------------------------------------------------------
 Version: 1.3.10
 Date: 2025-07-27
   Bugfixes:

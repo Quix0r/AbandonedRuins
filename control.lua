@@ -9,6 +9,16 @@ debug_on_tick = settings.global["ruins-enable-debug-on-tick"].value
 ---@type table<string, RuinSet>
 local _ruin_sets = {}
 
+-- Always-excluded surfaces (intended for "internal" surfaces, don't add your planet here)
+---@type table<string, boolean>
+local excluded_surfaces = {
+  ["beltlayer"]     = true,
+  ["pipelayer"]     = true,
+  ["Factory floor"] = true, -- factorissimo
+  ["ControlRoom"]   = true, -- mobile factory
+  ["NiceFill"]      = true  -- mod's own surface
+}
+
 -- Initial ruin sizes: small, medium, large
 ---@type table<string>
 local ruin_sizes = {"small", "medium", "large"}
@@ -67,7 +77,7 @@ end
 local function update_debug_log()
   debug_log = settings.global["ruins-enable-debug-log"].value
   debug_on_tick = settings.global["ruins-enable-debug-on-tick"].value
-  game.print(string.format("debug log is now: %s/%s", debug_log, debug_on_tick))
+  game.print(string.format("Ruins: debug log is now: debug=%s,on_tick=%s", debug_log, debug_on_tick))
 end
 
 local function init()
@@ -85,17 +95,6 @@ local function init()
 
   ---@type RuinQueueItem[]
   storage.ruin_queue = storage.ruin_queue or {}
-
-  if not storage.excluded_surfaces then
-    if debug_log then log("[init]: Initializing excluded_surfaces table ...") end
-    storage.excluded_surfaces = {
-      ["beltlayer"]     = true,
-      ["pipelayer"]     = true,
-      ["Factory floor"] = true, -- factorissimo
-      ["ControlRoom"]   = true, -- mobile factory
-      ["NiceFill"]      = true  -- mod's own surface
-    }
-  end
 
   if debug_log then log("[init]: EXIT!") end
 end
@@ -129,9 +128,13 @@ script.on_event(defines.events.on_tick,
       log(string.format("[on_tick]: event.tick=%d has empty list set, deleting list ... - EXIT!", event.tick))
       storage.ruin_queue[event.tick] = nil
       return
+    elseif not _ruin_sets[ruinset_name] then
+      error(string.format("[on_tick]: ruinset_name='%s' is not registered with this mod", ruinset_name))
+    elseif not utils.ruin_half_sizes[ruin.size] then
+      error(string.format("[on_tick]: ruin.size='%s' is not registered in ruin_half_sizes table", ruin.size))
     end
 
-    if debug_on_tick then log(string.format("[on_tick]: Spawning %d random ruin sets ...", #ruins)) end
+    if debug_on_tick then log(string.format("[on_tick]: Spawning %d random ruin sets ...", table_size(ruins))) end
     for _, ruin in pairs(ruins) do
       if debug_on_tick then log(string.format("[on_tick]: Spawning ruin.size='%s',ruin.center='%s',ruin.surface='%s' ...", ruin.size, tostring(ruin.center), tostring(ruin.surface))) end
       if storage.exclusive_ruinset[ruin.surface.name] == nil or ruinset_name == storage.exclusive_ruinset[ruin.surface.name] then
@@ -153,9 +156,11 @@ script.on_event(defines.events.on_tick,
 ---@param tick uint
 ---@param ruin RuinQueueItem
 local function queue_ruin(tick, ruin)
-  if debug_log then log(string.format("[queue_ruin]: tick=%d,ruin[]='%s' - CALLED!", tick, type(ruin))) end
+  if debug_log then log(string.format("[queue_ruin]: tick[%s]=%d,ruin[]='%s' - CALLED!", type(tick), tick, type(ruin))) end
   if ruin.surface.name == constants.DEBUG_SURFACE_NAME then
     error(string.format("[queue_ruin]: Debug surface '%s' has no random ruin spawning.", ruin.surface.name))
+  elseif utils.str_contains_any_from_table(ruin.surface.name, excluded_surfaces) then
+    error(string.format("[queue_ruin]: ruin.surface.name='%s' is excluded - EXIT!", ruin.surface.name))
   end
 
   local processing_tick = tick + 1
@@ -186,6 +191,8 @@ local function try_ruin_spawn(size, min_distance, center, surface, tick)
     error(string.format("[try_ruin_spawn]: size='%s' is not found in multiplier table", size))
   elseif surface.name == constants.DEBUG_SURFACE_NAME then
     error(string.format("[try_ruin_spawn]: Debug surface '%s' has no random ruin spawning.", surface.name))
+  elseif utils.str_contains_any_from_table(surface.name, excluded_surfaces) then
+    error(string.format("[try_ruin_spawn]: surface.name='%s' is excluded - EXIT!", surface.name))
   end
 
   min_distance = min_distance * utils.ruin_min_distance_multiplier[size]
@@ -224,7 +231,7 @@ script.on_event(defines.events.on_chunk_generated,
     elseif event.surface.name == constants.DEBUG_SURFACE_NAME then
       if debug_log then log(string.format("[on_chunk_generated]: Debug surface '%s' must spawn ruins on their own, not through randomness.", event.surface.name)) end
       return
-    elseif utils.str_contains_any_from_table(event.surface.name, storage.excluded_surfaces) then
+    elseif utils.str_contains_any_from_table(event.surface.name, excluded_surfaces) then
       if debug_log then log(string.format("[on_chunk_generated]: event.surface.name='%s' is excluded - EXIT!", event.surface.name)) end
       return
     end
@@ -240,7 +247,7 @@ script.on_event(defines.events.on_chunk_generated,
         if debug_log then log(string.format("[on_chunk_generated]: Trying to spawn ruin of size='%s' at event.surface='%s' ...", size, event.surface)) end
         try_ruin_spawn(size, min_distance, center, event.surface, event.tick)
 
-        if debug_log then log("[on_chunk_generated]: BREAK!") end
+        if debug_log then log("[on_chunk_generated]: Ruin was attempted to spawn - BREAK!") end
         break
       end
     end
@@ -350,7 +357,7 @@ remote.add_interface("AbandonedRuins",
     end
 
     if debug_log then log(string.format("[exclude_surface]: Excluding surface name='%s' ...", name)) end
-    storage.excluded_surfaces[name] = true
+    excluded_surfaces[name] = true
 
     if debug_log then log("[exclude_surface]: EXIT!") end
   end,
@@ -358,13 +365,13 @@ remote.add_interface("AbandonedRuins",
   -- You excluded a surface at some earlier point but you don't want it excluded anymore.
   ---@param name string
   reinclude_surface = function(name)
-    if debug_log then log(string.format("[reinclude_surface]: name[]='%s',ruin_sets[]='%s' - CALLED!", type(name), type(ruin_sets))) end
+    if debug_log then log(string.format("[reinclude_surface]: name[]='%s' - CALLED!", type(name))) end
     if type(name) ~= "string" then
       error(string.format("[reinclude_surface]: name[]='%s' is not expected type 'string'", type(name)))
     end
 
     if debug_log then log(string.format("[reinclude_surface]: Reincluding surface name='%s' ...", name)) end
-    storage.excluded_surfaces[name] = nil
+    excluded_surfaces[name] = nil
 
     if debug_log then log("[reinclude_surface]: EXIT!") end
   end,
