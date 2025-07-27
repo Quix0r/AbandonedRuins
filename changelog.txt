@@ -1,4 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.9
+Date: 2025-07-27
+  Features:
+    - `add_ruin_size()` now has a 2nd parameter, `half_size` (uint) which will be added/updated
+      in table `utils.ruin_half_sizes`
+    - added another debug message
+  Bugfixes:
+    - fixed logic error in fluid handling in `safe_insert_fluid()`, thanks to @Silly_Warlock
+      pointing it out
+    - got rid of local copies of `prototypes.fluid` and `entity.insert_fluid()`
+---------------------------------------------------------------------------------------------------
 Version: 1.3.8
 Date: 2025-07-24
   Features:

@@ -77,17 +77,16 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
 
   local e = surface.create_entity
   {
-    name = entity_name,
-    position = {center.x + relative_position.x, center.y + relative_position.y},
-    direction = defines.direction[extra_options.dir] or defines.direction.north,
-    force = force,
+    name        = entity_name,
+    position    = {center.x + relative_position.x, center.y + relative_position.y},
+    direction   = defines.direction[extra_options.dir] or defines.direction.north,
+    force       = force,
     raise_built = true,
     create_build_effect_smoke = false,
-    recipe = recipe
+    recipe      = recipe
   }
-  if debug_log then log(string.format("[spawn_entity]: Entity created: e.valid='%s'", e.valid)) end
 
-  if debug_log then log(string.format("[spawn_entity]: extra_options.dmg[]='%s'", type(extra_options.dmg))) end
+  if debug_log then log(string.format("[spawn_entity]: e[]='%s',extra_options.dmg[]='%s'", type(e), type(extra_options.dmg))) end
   if extra_options.dmg then
     utils.safe_damage(e, extra_options.dmg, expressions.number(extra_options.dmg.dmg, vars))
   end

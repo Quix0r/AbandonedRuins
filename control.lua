@@ -133,6 +133,7 @@ script.on_event(defines.events.on_tick,
       if debug_on_tick then log(string.format("[on_tick]: Spawning ruin.size='%s',ruin.center='%s',ruin.surface='%s' ...", ruin.size, tostring(ruin.center), tostring(ruin.surface))) end
       if storage.exclusive_ruinset[ruin.surface.name] == nil or ruinset_name == storage.exclusive_ruinset[ruin.surface.name] then
         -- The ruin-set is either marked as non-exclusive or it surface and ruin-set name are matching
+        if debug_on_tick then log(string.format("[on_tick]: Invoking spawning.spawn_random_ruin() with ruinset_name='%s',ruin.size='%s' ...", ruinset_name, ruin.size)) end
         spawning.spawn_random_ruin(_ruin_sets[ruinset_name][ruin.size], utils.ruin_half_sizes[ruin.size], ruin.center, ruin.surface)
       end
     end
@@ -313,16 +314,24 @@ remote.add_interface("AbandonedRuins",
   ---@return boolean
   get_spawn_ruins = function() return storage.spawn_ruins end,
 
-  -- Add ruin size
-  ---@param name string
-  add_ruin_size = function(name)
-    if type(name) ~= "string" then
-      error(string.format("[add_ruin_size]: name[]='%s' is not expected type 'string'", type(name)))
-    elseif ruin_sizes[name] ~= nil then
-      error(string.format("[add_ruin_size]: name='%s' is already added as ruin size", name))
+  -- Add ruin size and its halfed size
+  ---@param size string
+  ---@param half_size number
+  add_ruin_size = function(size, half_size)
+    if debug_log then log(string.format("[add_ruin_size]: size[]='%s',half_size[]='%s' - CALLED!", type(size), type(half_size))) end
+    if type(size) ~= "string" then
+      error(string.format("[add_ruin_size]: size[]='%s' is not expected type 'string'", type(size)))
+    elseif type(half_size) ~= "number" then
+      error(string.format("[add_ruin_size]: half_size[]='%s' is not expected type 'number'", type(half_size)))
+    elseif ruin_sizes[size] ~= nil then
+      error(string.format("[add_ruin_size]: size='%s' is already added as ruin size", size))
     end
 
-    table.insert(ruin_sizes, name)
+    if debug_log then log(string.format("[add_ruin_size]: Adding ruin size='%s',half_size=%d ...", size, half_size)) end
+    table.insert(ruin_sizes, size)
+    table.insert(utils.ruin_half_sizes, half_size)
+
+    if debug_log then log("[add_ruin_size]: EXIT!") end
   end,
 
   -- Get all ruin sizes
@@ -383,6 +392,7 @@ remote.add_interface("AbandonedRuins",
   ---@param small_ruins Ruin[]
   ---@param medium_ruins Ruin[]
   ---@param large_ruins Ruin[]
+  ---@deprecated
   add_ruin_set = function(name, small_ruins, medium_ruins, large_ruins)
     log(string.format("[add_ruin_set]: DEPECATED! This function only allows 'small', 'medium' and 'large'. Please use add_ruin_sets() instead! name='%s'", name))
     if type(name) ~= "string" then

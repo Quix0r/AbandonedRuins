@@ -58,17 +58,21 @@ util.safe_insert = core_utils.insert_safe
 ---@param fluid_dict table<string, number> Dictionary of fluid names to amounts
 util.safe_insert_fluid = function(entity, fluid_dict)
   if debug_log then log(string.format("[safe_insert_fluid]: entity[]='%s',fluid_dict[]='%s' - CALLED!", type(entity), type(fluid_dict))) end
-  if not (entity and entity.valid and fluid_dict) then
-    log(string.format("[safe_insert_fluid]: entitiy[]='%s' or fluid_dict[]='%s' is not valid!", type(entity), type(fluid_dict)))
+  if not (entity and entity.valid) then
+    log(string.format("[safe_insert_fluid]: entity[]='%s' is not valid!", type(entity)))
+    return
+  elseif not fluid_dict then
+    log(string.format("[safe_insert_fluid']: fluid_dict[]='%s' is not valid!", type(fluid_dict)))
     return
   end
 
-  local fluids = prototypes.fluid
-  local insert = entity.insert_fluid
-
   for name, amount in pairs (fluid_dict) do
-    if fluids[name] or not fluids[name].valid then
-      insert{name = name, amount = amount}
+    if debug_log then log(string.format("[safe_insert_fluid]: name='%s',amount=%d", name, amount)) end
+    if prototypes.fluid[name] ~= nil and prototypes.fluid[name].valid then
+      entity.insert_fluid({
+        name   = name,
+        amount = amount
+      })
     else
       log(string.format("[safe_insert_fluid]: name='%s' is not a valid fluid to insert", name))
     end
@@ -79,26 +83,26 @@ end
 
 ---@param entity LuaEntity
 ---@param damage_info Damage
----@param damage_amount number
-util.safe_damage = function(entity, damage_info, damage_amount)
+---@param amount number
+util.safe_damage = function(entity, damage_info, amount)
   if not (entity and entity.valid) then
     log(string.format("[safe_damage]: entity[]='%s' is not valid!", type(entity)))
     return
-  elseif type(damage_amount) ~= "number" then
-    error(string.format("[safe_damage]: damage_amount[]='%s' is not expected type 'number'", type(damage_amount)))
+  elseif type(amount) ~= "number" then
+    error(string.format("[safe_damage]: amount[]='%s' is not expected type 'number'", type(amount)))
   end
 
-  entity.damage(damage_amount, damage_info.force or "neutral", damage_info.type or "physical")
+  entity.damage(amount, damage_info.force or "neutral", damage_info.type or "physical")
 end
 
 ---@param entity LuaEntity
 ---@param chance number
 util.safe_die = function(entity, chance)
   if not (entity and entity.valid) then
-    log(string.format("[safe_damage]: entity[]='%s' is not valid!", type(entity)))
+    log(string.format("[safe_die]: entity[]='%s' is not valid!", type(entity)))
     return
   elseif type(chance) ~= "number" then
-    error(string.format("[safe_damage]: chance[]='%s' is not expected type 'number'", type(chance)))
+    error(string.format("[safe_die]: chance[]='%s' is not expected type 'number'", type(chance)))
   end
 
   if math.random() <= chance then
