@@ -77,6 +77,9 @@ local function init()
   -- Initialize spawn changes array (isn't stored in save-game)
   init_spawn_chances()
 
+  -- Update debug flags
+  update_debug_log()
+
   ---@type boolean
   storage.spawn_ruins = storage.spawn_ruins or true
 
@@ -93,11 +96,11 @@ local function init()
       ["NiceFill"]      = true  -- mod's own surface
     }
   end
+
   if debug_log then log("[init]: EXIT!") end
 end
 
 script.on_init(init)
-script.on_configuration_changed(update_debug_log)
 script.on_configuration_changed(init)
 script.on_event(defines.events.on_player_created, update_debug_log)
 script.on_event(defines.events.on_runtime_mod_setting_changed, init)

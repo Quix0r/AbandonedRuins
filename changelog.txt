@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.10
+Date: 2025-07-27
+  Bugfixes:
+    - Event registrations can only be one function at a time. So if you register two to the
+      same event the later one overwrites the other one, thanks to @Silly_Warlock pointing this
+      out
+  Minor:
+    - added function name to error messages
+---------------------------------------------------------------------------------------------------
 Version: 1.3.9
 Date: 2025-07-27
   Features:

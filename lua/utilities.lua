@@ -163,9 +163,9 @@ end
 ---@param is_default boolean
 util.register_ruin_set = function(name, is_default)
   if type(name) ~= "string" then
-    error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+    error(string.format("[register_ruin_set]: name[]='%s' is not expected type 'string'", type(name)))
   elseif type(is_default) ~= "boolean" then
-    error(string.format("is_default[]='%s' is not expected type 'boolean'", type(is_default)))
+    error(string.format("[register_ruin_set]: is_default[]='%s' is not expected type 'boolean'", type(is_default)))
   end
 
   -- First get settings
