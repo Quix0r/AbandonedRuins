@@ -53,7 +53,7 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
   if debug_log then log(string.format("[spawn_entity]: entity_name='%s'", entity_name)) end
 
   if _G["prototypes"].entity[entity_name] == nil then
-    log(string.format("[spawn_entity]: entity_name='%s' does not exist!", entity_name))
+    log(string.format("[spawn_entity]: entity_name='%s' does not exist - EXIT!", entity_name))
     return
   end
 

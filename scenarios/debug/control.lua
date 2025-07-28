@@ -48,25 +48,33 @@ script.on_event(defines.events.on_player_created, function(event)
   --  which run after the scenario on_init, but before scenario on_player_created
 
   -- Set up the debug surface
+  log(string.format("[on_player_created]: Loading %s='%s' ...", constants.CURRENT_RUIN_SET_KEY, settings.global[constants.CURRENT_RUIN_SET_KEY].value))
   local ruin_set = remote.call("AbandonedRuins", "get_current_ruin_set")
+  log(string.format("[on_player_created]: ruin_set[]='%s'", type(ruin_set)))
+  if ruin_set == nil then
+    -- Issue notice
+    game.print("Abandoned Ruins: No ruins loaded! Will not create debug world.")
+    return
+  end
+
   local total_ruins_amount = #ruin_set.small + #ruin_set.medium + #ruin_set.large
   local chunk_radius = math.ceil(math.sqrt(total_ruins_amount) / 2)
+
   log(string.format("[on_player_created]: total_ruins_amount=%d,chunk_radius=%.2f", total_ruins_amount, chunk_radius))
 
-  local mgs = {
+  local surface = game.create_surface(constants.DEBUG_SURFACE_NAME, {
     width  = chunk_radius * 2 * 32,
     height = chunk_radius * 2 * 32,
     default_enable_all_autoplace_controls = false,
     property_expression_names = {
       elevation = 10
     }
-  }
-
-  local surface = game.create_surface(constants.DEBUG_SURFACE_NAME, mgs)
+  })
 
   -- skip invalid surfaces
   if not surface.valid then
-    log(string.format("WARNING: surface.name='%s' is not valid - EXIT!", surface.name))
+    game.print(string.format("Abandoned Ruins: Invalid surface created: '%s'", constants.DEBUG_SURFACE_NAME))
+    log(string.format("WARNING: surface[]='%s',name='%s' is not valid - EXIT!", type(surface), constants.DEBUG_SURFACE_NAME))
     return
   end
 

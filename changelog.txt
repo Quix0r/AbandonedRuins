@@ -2,6 +2,8 @@
 Version: 1.3.11
 Date: 2025-07-27
   Bugfixes:
+    - skip creating debug world surface when no ruin-set was loaded (e.g. only this mod installed)
+    - local variable `mgs` was pointless as it only caused more memory usage and was used only once
     - moved `excluded_surfaces` to temporary local variable, it shouldn't be persisted or else
       I cannot add new internal surfaces easily.
     - added more checks on array elements to avoid crashes with `?` and `nil` only which are
