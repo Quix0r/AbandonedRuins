@@ -6,6 +6,9 @@ Date: 2025-07-27
       I cannot add new internal surfaces easily.
     - added more checks on array elements to avoid crashes with `?` and `nil` only which are
       hard to debug
+    - handle missing ruin-set while it is still configured. This might be the case when a mod
+      failed to properly load its ruin-sets
+    - use constants.ENABLE_DEBUG_LOG_KEY instead of hard-coded string (recommended for mod devs)
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.10
 Date: 2025-07-27

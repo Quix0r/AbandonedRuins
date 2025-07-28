@@ -3,7 +3,7 @@ local utils = require("__AbandonedRuins_updated_fork__/lua/utilities")
 local spawning = require("__AbandonedRuins_updated_fork__/lua/spawning")
 
 -- Enable debug log by default
-settings.global["ruins-enable-debug-log"].value = true
+settings.global[constants.ENABLE_DEBUG_LOG_KEY].value = true
 debug_log = true
 
 ---@param center MapPosition

@@ -2,7 +2,7 @@ local constants = require("lua/constants")
 local utils = require("lua/utilities")
 local spawning = require("lua/spawning")
 
-debug_log = settings.global["ruins-enable-debug-log"].value
+debug_log = settings.global[constants.ENABLE_DEBUG_LOG_KEY].value
 debug_on_tick = settings.global["ruins-enable-debug-on-tick"].value
 
 -- Init ruin sets (empty for now)
@@ -75,7 +75,7 @@ local function init_spawn_chances()
 end
 
 local function update_debug_log()
-  debug_log = settings.global["ruins-enable-debug-log"].value
+  debug_log = settings.global[constants.ENABLE_DEBUG_LOG_KEY].value
   debug_on_tick = settings.global["ruins-enable-debug-on-tick"].value
   game.print(string.format("Ruins: debug log is now: debug=%s,on_tick=%s", debug_log, debug_on_tick))
 end
@@ -129,14 +129,15 @@ script.on_event(defines.events.on_tick,
       storage.ruin_queue[event.tick] = nil
       return
     elseif not _ruin_sets[ruinset_name] then
-      error(string.format("[on_tick]: ruinset_name='%s' is not registered with this mod", ruinset_name))
-    elseif not utils.ruin_half_sizes[ruin.size] then
-      error(string.format("[on_tick]: ruin.size='%s' is not registered in ruin_half_sizes table", ruin.size))
+      error(string.format("[on_tick]: ruinset_name='%s' is not registered with this mod. Have you forgotten to remote-call `register_ruin_set`?", ruinset_name))
     end
 
     if debug_on_tick then log(string.format("[on_tick]: Spawning %d random ruin sets ...", table_size(ruins))) end
     for _, ruin in pairs(ruins) do
       if debug_on_tick then log(string.format("[on_tick]: Spawning ruin.size='%s',ruin.center='%s',ruin.surface='%s' ...", ruin.size, tostring(ruin.center), tostring(ruin.surface))) end
+      if not utils.ruin_half_sizes[ruin.size] then
+        error(string.format("[on_tick]: ruin.size='%s' is not registered in ruin_half_sizes table. Have you forgotten to remote-call `register_ruin_set`?", ruin.size))
+      end
       if storage.exclusive_ruinset[ruin.surface.name] == nil or ruinset_name == storage.exclusive_ruinset[ruin.surface.name] then
         -- The ruin-set is either marked as non-exclusive or it surface and ruin-set name are matching
         if debug_on_tick then log(string.format("[on_tick]: Invoking spawning.spawn_random_ruin() with ruinset_name='%s',ruin.size='%s' ...", ruinset_name, ruin.size)) end
