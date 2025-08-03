@@ -89,7 +89,7 @@ util.safe_damage = function(entity, damage_info, amount)
     log(string.format("[safe_damage]: entity[]='%s' is not valid!", type(entity)))
     return
   elseif type(amount) ~= "number" then
-    error(string.format("[safe_damage]: amount[]='%s' is not expected type 'number'", type(amount)))
+    error(string.format("amount[]='%s' is not expected type 'number'", type(amount)))
   end
 
   entity.damage(amount, damage_info.force or "neutral", damage_info.type or "physical")
@@ -102,7 +102,7 @@ util.safe_die = function(entity, chance)
     log(string.format("[safe_die]: entity[]='%s' is not valid!", type(entity)))
     return
   elseif type(chance) ~= "number" then
-    error(string.format("[safe_die]: chance[]='%s' is not expected type 'number'", type(chance)))
+    error(string.format("chance[]='%s' is not expected type 'number'", type(chance)))
   end
 
   if math.random() <= chance then
@@ -163,9 +163,9 @@ end
 ---@param is_default boolean
 util.register_ruin_set = function(name, is_default)
   if type(name) ~= "string" then
-    error(string.format("[register_ruin_set]: name[]='%s' is not expected type 'string'", type(name)))
+    error(string.format("name[]='%s' is not expected type 'string'", type(name)))
   elseif type(is_default) ~= "boolean" then
-    error(string.format("[register_ruin_set]: is_default[]='%s' is not expected type 'boolean'", type(is_default)))
+    error(string.format("is_default[]='%s' is not expected type 'boolean'", type(is_default)))
   end
 
   -- First get settings

@@ -10,7 +10,11 @@ local constants = {
 
   -- Debug surface name
   ---@type string
-  DEBUG_SURFACE_NAME = "debug-ruins"
+  DEBUG_SURFACE_NAME = "debug-ruins",
+
+  -- None (no ruin-set selected)
+  ---@type string
+  NONE = "__none__"
 }
 
 return constants

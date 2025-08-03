@@ -62,8 +62,8 @@ data:extend({
     type = "string-setting",
     name = constants.CURRENT_RUIN_SET_KEY,
     setting_type = "runtime-global",
-    allowed_values = {"base"},
-    default_value = "base",
+    allowed_values = {constants.NONE},
+    default_value = constants.NONE,
     order = "e",
   }
 })

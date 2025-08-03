@@ -16,7 +16,8 @@ local excluded_surfaces = {
   ["pipelayer"]     = true,
   ["Factory floor"] = true, -- factorissimo
   ["ControlRoom"]   = true, -- mobile factory
-  ["NiceFill"]      = true  -- mod's own surface
+  ["NiceFill"]      = true, -- NiceFill's hidden surface
+  ["aai-signals"]   = true  -- AAI Signals' hidden surface
 }
 
 -- Initial ruin sizes: small, medium, large
@@ -129,14 +130,14 @@ script.on_event(defines.events.on_tick,
       storage.ruin_queue[event.tick] = nil
       return
     elseif not _ruin_sets[ruinset_name] then
-      error(string.format("[on_tick]: ruinset_name='%s' is not registered with this mod. Have you forgotten to remote-call `register_ruin_set`?", ruinset_name))
+      error(string.format("ruinset_name='%s' is not registered with this mod. Have you forgotten to remote-call `register_ruin_set`?", ruinset_name))
     end
 
     if debug_on_tick then log(string.format("[on_tick]: Spawning %d random ruin sets ...", table_size(ruins))) end
     for _, ruin in pairs(ruins) do
       if debug_on_tick then log(string.format("[on_tick]: Spawning ruin.size='%s',ruin.center='%s',ruin.surface='%s' ...", ruin.size, tostring(ruin.center), tostring(ruin.surface))) end
       if not utils.ruin_half_sizes[ruin.size] then
-        error(string.format("[on_tick]: ruin.size='%s' is not registered in ruin_half_sizes table. Have you forgotten to remote-call `register_ruin_set`?", ruin.size))
+        error(string.format("ruin.size='%s' is not registered in ruin_half_sizes table. Have you forgotten to remote-call `register_ruin_set`?", ruin.size))
       end
       if storage.exclusive_ruinset[ruin.surface.name] == nil or ruinset_name == storage.exclusive_ruinset[ruin.surface.name] then
         -- The ruin-set is either marked as non-exclusive or it surface and ruin-set name are matching
@@ -159,9 +160,9 @@ script.on_event(defines.events.on_tick,
 local function queue_ruin(tick, ruin)
   if debug_log then log(string.format("[queue_ruin]: tick[%s]=%d,ruin[]='%s' - CALLED!", type(tick), tick, type(ruin))) end
   if ruin.surface.name == constants.DEBUG_SURFACE_NAME then
-    error(string.format("[queue_ruin]: Debug surface '%s' has no random ruin spawning.", ruin.surface.name))
+    error(string.format("Debug surface '%s' has no random ruin spawning.", ruin.surface.name))
   elseif utils.str_contains_any_from_table(ruin.surface.name, excluded_surfaces) then
-    error(string.format("[queue_ruin]: ruin.surface.name='%s' is excluded - EXIT!", ruin.surface.name))
+    error(string.format("ruin.surface.name='%s' is excluded - EXIT!", ruin.surface.name))
   end
 
   local processing_tick = tick + 1
@@ -185,19 +186,22 @@ end
 local function try_ruin_spawn(size, min_distance, center, surface, tick)
   if debug_log then log(string.format("[try_ruin_spawn]: size='%s',min_distance=%d,center[]='%s',surface[]='%s',tick=%d - CALLED!", size, min_distance, type(center), type(surface), tick)) end
   if type(size) ~= "string" then
-    error(string.format("[try_ruin_spawn]: size[]='%s' is not expected type 'string'", type(size)))
+    error(string.format("size[]='%s' is not expected type 'string'", type(size)))
   elseif type(min_distance) ~= "number" then
-    error(string.format("[try_ruin_spawn]: min_distance[]='%s' is not expected type 'string'", type(min_distance)))
+    error(string.format("min_distance[]='%s' is not expected type 'string'", type(min_distance)))
   elseif utils.ruin_min_distance_multiplier[size] == nil then
-    error(string.format("[try_ruin_spawn]: size='%s' is not found in multiplier table", size))
+    error(string.format("size='%s' is not found in multiplier table", size))
   elseif surface.name == constants.DEBUG_SURFACE_NAME then
-    error(string.format("[try_ruin_spawn]: Debug surface '%s' has no random ruin spawning.", surface.name))
+    error(string.format("Debug surface '%s' has no random ruin spawning.", surface.name))
   elseif utils.str_contains_any_from_table(surface.name, excluded_surfaces) then
-    error(string.format("[try_ruin_spawn]: surface.name='%s' is excluded - EXIT!", surface.name))
+    error(string.format("surface.name='%s' is excluded - EXIT!", surface.name))
+  elseif settings.global[constants.CURRENT_RUIN_SET_KEY].value == constants.NONE then
+    error("No ruin-set selected by player but this function was invoked. This should not happen.")
   end
 
+  if debug_log then log(string.format("[try_ruin_spawn]: min_distance=%d - BEFORE!", min_distance)) end
   min_distance = min_distance * utils.ruin_min_distance_multiplier[size]
-  if debug_log then log(string.format("[try_ruin_spawn]: min_distance=%d", min_distance)) end
+  if debug_log then log(string.format("[try_ruin_spawn]: min_distance=%d - AFTER!", min_distance)) end
 
   if math.abs(center.x) < min_distance and math.abs(center.y) < min_distance then
     if debug_log then log(string.format("[try_ruin_spawn]: min_distance=%d is to close to spawn area - EXIT!", min_distance)) end
@@ -231,6 +235,9 @@ script.on_event(defines.events.on_chunk_generated,
       return
     elseif event.surface.name == constants.DEBUG_SURFACE_NAME then
       if debug_log then log(string.format("[on_chunk_generated]: Debug surface '%s' must spawn ruins on their own, not through randomness.", event.surface.name)) end
+      return
+    elseif settings.global[constants.CURRENT_RUIN_SET_KEY].value == constants.NONE then
+      if debug_log then log("[on_chunk_generated]: No ruin-set selected by player - EXIT!") end
       return
     elseif utils.str_contains_any_from_table(event.surface.name, excluded_surfaces) then
       if debug_log then log(string.format("[on_chunk_generated]: event.surface.name='%s' is excluded - EXIT!", event.surface.name)) end
@@ -312,7 +319,7 @@ remote.add_interface("AbandonedRuins",
   set_spawn_ruins = function(spawn_ruins)
     if debug_log then log(string.format("[set_spawn_ruins]: spawn_ruins[]=%s - CALLED!", type(spawn_ruins))) end
     if type(spawn_ruins) ~= "boolean" then
-      error(string.format("[set_spawn_ruins]: spawn_ruins[]='%s' is not expected type 'boolean'", type(spawn_ruins)))
+      error(string.format("spawn_ruins[]='%s' is not expected type 'boolean'", type(spawn_ruins)))
     end
 
     if debug_log then log(string.format("[set_spawn_ruins]: Setting spawn_ruins=%s", spawn_ruins)) end
@@ -331,11 +338,11 @@ remote.add_interface("AbandonedRuins",
   add_ruin_size = function(size, half_size)
     if debug_log then log(string.format("[add_ruin_size]: size[]='%s',half_size[]='%s' - CALLED!", type(size), type(half_size))) end
     if type(size) ~= "string" then
-      error(string.format("[add_ruin_size]: size[]='%s' is not expected type 'string'", type(size)))
+      error(string.format("size[]='%s' is not expected type 'string'", type(size)))
     elseif type(half_size) ~= "number" then
-      error(string.format("[add_ruin_size]: half_size[]='%s' is not expected type 'number'", type(half_size)))
+      error(string.format("half_size[]='%s' is not expected type 'number'", type(half_size)))
     elseif ruin_sizes[size] ~= nil then
-      error(string.format("[add_ruin_size]: size='%s' is already added as ruin size", size))
+      error(string.format("size='%s' is already added as ruin size", size))
     end
 
     if debug_log then log(string.format("[add_ruin_size]: Adding ruin size='%s',half_size=%d ...", size, half_size)) end
@@ -354,7 +361,7 @@ remote.add_interface("AbandonedRuins",
   exclude_surface = function(name)
     if debug_log then log(string.format("[exclude_surface]: name[]='%s',ruin_sets[]='%s' - CALLED!", type(name), type(ruin_sets))) end
     if type(name) ~= "string" then
-      error(string.format("[exclude_surface]: name[]='%s' is not expected type 'string'", type(name)))
+      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     end
 
     if debug_log then log(string.format("[exclude_surface]: Excluding surface name='%s' ...", name)) end
@@ -368,7 +375,7 @@ remote.add_interface("AbandonedRuins",
   reinclude_surface = function(name)
     if debug_log then log(string.format("[reinclude_surface]: name[]='%s' - CALLED!", type(name))) end
     if type(name) ~= "string" then
-      error(string.format("[reinclude_surface]: name[]='%s' is not expected type 'string'", type(name)))
+      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     end
 
     if debug_log then log(string.format("[reinclude_surface]: Reincluding surface name='%s' ...", name)) end
@@ -386,9 +393,9 @@ remote.add_interface("AbandonedRuins",
   add_ruin_sets = function(name, ruin_sets)
     if debug_log then log(string.format("[add_ruin_sets]: name[]='%s',ruin_sets[]='%s' - CALLED!", type(name), type(ruin_sets))) end
     if type(name) ~= "string" then
-      error(string.format("[add_ruin_sets]: name[]='%s' is not expected type 'string'", type(name)))
+      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     elseif type(ruin_sets) ~= "table" then
-      error(string.format("[add_ruin_sets]: ruin_sets[]='%s' is not expected type 'table'", type(ruin_sets)))
+      error(string.format("ruin_sets[]='%s' is not expected type 'table'", type(ruin_sets)))
     end
 
     if debug_log then log(string.format("[add_ruin_sets]: Setting name='%s' ruin sets ...", name)) end
@@ -407,7 +414,7 @@ remote.add_interface("AbandonedRuins",
   add_ruin_set = function(name, small_ruins, medium_ruins, large_ruins)
     log(string.format("[add_ruin_set]: DEPECATED! This function only allows 'small', 'medium' and 'large'. Please use add_ruin_sets() instead! name='%s'", name))
     if type(name) ~= "string" then
-      error(string.format("[add_ruin_set]: name[]='%s' is not expected type 'string'", type(name)))
+      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     elseif not (small_ruins and next(small_ruins)) then
       error("[add_ruin_set]: Argument 'small_ruins' is an empty ruin set")
     elseif not (medium_ruins and next(medium_ruins)) then
@@ -430,7 +437,7 @@ remote.add_interface("AbandonedRuins",
   get_ruin_set = function(name)
     if debug_log then log(string.format("[get_ruin_set]: name[]='%s' - CALLED!", type(name))) end
     if type(name) ~= "string" then
-      error(string.format("[get_ruin_set]: name[]='%s' is not expected type 'string'", type(name)))
+      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     end
 
     if debug_log then log(string.format("[get_ruin_set]: _ruin_sets[%s][]='%s' - EXIT!", name, type(_ruin_sets[name]))) end

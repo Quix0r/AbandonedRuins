@@ -11,9 +11,9 @@ local function no_corpse_fade(half_size, center, surface)
   if debug_log then log(string.format("[no_corpse_fade]: half_size=%d,center[]='%s',surface[]='%s' - CALLED!", half_size, type(center), type(surface))) end
 
   if half_size <= 0 then
-    error(string.format("[no_corpse_fade]: Unexpected value half_size=%d, must be positive", half_size))
+    error(string.format("Unexpected value half_size=%d, must be positive", half_size))
   elseif not surface.valid then
-    error(string.format("[no_corpse_fade]: surface.name='%s' is not valid", surface.name))
+    error(string.format("surface.name='%s' is not valid", surface.name))
   end
 
   local area = utils.area_from_center_and_half_size(half_size, center)
@@ -46,7 +46,7 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
     ))
   end
   if not surface.valid then
-    error(string.format("[spawn_entity]: surface.name='%s' is not valid", surface.name))
+    error(string.format("surface.name='%s' is not valid", surface.name))
   end
 
   local entity_name = expressions.entity(entity, vars)
@@ -153,9 +153,9 @@ end
 local function spawn_entities(entities, center, surface, vars)
   if debug_log then log(string.format("[spawn_entities]: entities[]='%s',center[]='%s',surface[]='%s',vars[]='%s' - CALLED!", type(entities), type(center), type(surface), type(vars))) end
   if table_size(entities) == 0 then
-    error(string.format("[spawn_entities]: No entities to spawn on surface.name='%s' - EXIT!", surface.name))
+    error(string.format("No entities to spawn on surface.name='%s' - EXIT!", surface.name))
   elseif not surface.valid then
-    error(string.format("[spawn_entities]: surface.name='%s' is not valid", surface.name))
+    error(string.format("surface.name='%s' is not valid", surface.name))
   end
 
   if debug_log then log(string.format("[spawn_entities]: Spawning %d entities on surface.name='%s' ...", #entities, surface.name)) end
@@ -174,7 +174,7 @@ local function spawn_tiles(ruin_tiles, center, surface)
   if table_size(ruin_tiles) == 0 then
     error("[spawn_tiles]: Cannot spawn empty run_tiles!")
   elseif not surface.valid then
-    error(string.format("[spawn_tiles]: surface.name='%s' is not valid", surface.name))
+    error(string.format("surface.name='%s' is not valid", surface.name))
   end
 
   local tiles = {}
@@ -226,7 +226,7 @@ local function parse_variables(variables)
       if debug_log then log(string.format("[parse_variables]: Parsing number expression for var.name='%s',var.value[]='%s' ...", var.name, type(var.value))) end
       parsed[var.name] = expressions.number(var.value)
     else
-      error(string.format("[parse_variables]: Unrecognized variable type: '%s'", var.type))
+      error(string.format("Unrecognized variable type: '%s'", var.type))
     end
   end
 
@@ -241,9 +241,9 @@ end
 local function clear_area(half_size, center, surface)
   if debug_log then log(string.format("[clear_area]: half_size[]='%s',center[]='%s',surface[]='%s' - CALLED!", type(half_size), type(center), type(surface))) end
   if half_size <= 0 then
-    error(string.format("[clear_area]: Unexpected value half_size=%d, must be positive", half_size))
+    error(string.format("Unexpected value half_size=%d, must be positive", half_size))
   elseif not surface.valid then
-    error(string.format("[clear_area]: surface.name='%s' is not valid", surface.name))
+    error(string.format("surface.name='%s' is not valid", surface.name))
   end
 
   local area = utils.area_from_center_and_half_size(half_size, center)
@@ -277,11 +277,11 @@ end
 spawning.spawn_ruin = function(ruin, half_size, center, surface)
   if debug_log then log(string.format("[spawn_ruin]: ruin[]='%s',half_size[]='%s',center[]='%s',surface[]='%s' - CALLED!", type(ruin), type(half_size), type(center), type(surface))) end
   if half_size <= 0 then
-    error(string.format("[spawn_ruin]: Unexpected value half_size=%d, must be positive", half_size))
+    error(string.format("Unexpected value half_size=%d, must be positive", half_size))
   elseif not surface.valid then
-    error(string.format("[spawn_ruin]: surface.name='%s' is not valid", surface.name))
+    error(string.format("surface.name='%s' is not valid", surface.name))
   elseif surface.name ~= constants.DEBUG_SURFACE_NAME and ruin.spawn_on_surfaces ~= nil and ruin.spawn_on_surfaces[surface.name] == nil then
-    error(string.format("[spawn_ruin]: surface.name='%s' is not allowed to spawn this ruin", surface.name))
+    error(string.format("surface.name='%s' is not allowed to spawn this ruin", surface.name))
   end
 
   if clear_area(half_size, center, surface) then
@@ -319,9 +319,9 @@ spawning.spawn_random_ruin = function(ruins, half_size, center, surface)
   if table_size(ruins) == 0 then
     error("[spawn_random_ruin]: Array 'ruins' is empty")
   elseif not surface.valid then
-    error(string.format("[spawn_random_ruin]: surface.name='%s' is not valid", surface.name))
+    error(string.format("surface.name='%s' is not valid", surface.name))
   elseif surface.name == constants.DEBUG_SURFACE_NAME then
-    error(string.format("[spawn_random_ruin]: Debug surface '%s' has no random ruin spawning.", surface.name))
+    error(string.format("Debug surface '%s' has no random ruin spawning.", surface.name))
   end
 
   ---@type Ruin

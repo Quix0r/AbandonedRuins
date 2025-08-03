@@ -122,7 +122,7 @@ parsing.number = function(t, vars)
     if debug_log then log(string.format("[number]: t=%.2f - EXIT!", t)) end
     return t
   end
-  error(string.format("[number]: t[]='%s' is not expected type 'number' or 'table'", type(t)))
+  error(string.format("t[]='%s' is not expected type 'number' or 'table'", type(t)))
 end
 
 ---@param t EntityExpression|string
@@ -149,7 +149,7 @@ parsing.entity = function(t, vars)
     if debug_log then log(string.format("[entity]: t='%s' - EXIT!", t)) end
     return t
   end
-  error(string.format("[entity]: t[]='%s' is not expected type 'string' or 'table'", type(t)))
+  error(string.format("t[]='%s' is not expected type 'string' or 'table'", type(t)))
 end
 
 return parsing
