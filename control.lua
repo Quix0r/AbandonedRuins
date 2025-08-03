@@ -158,7 +158,7 @@ script.on_event(defines.events.on_tick,
 ---@param tick uint
 ---@param ruin RuinQueueItem
 local function queue_ruin(tick, ruin)
-  if debug_log then log(string.format("[queue_ruin]: tick[%s]=%d,ruin[]='%s' - CALLED!", type(tick), tick, type(ruin))) end
+  if debug_log then log(string.format("[queue_ruin]: tick[]='%s',ruin[]='%s' - CALLED!", type(tick), type(ruin))) end
   if ruin.surface.name == constants.DEBUG_SURFACE_NAME then
     error(string.format("Debug surface '%s' has no random ruin spawning.", ruin.surface.name))
   elseif utils.str_contains_any_from_table(ruin.surface.name, excluded_surfaces) then
