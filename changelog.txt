@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.13
+Date: 2025-08-03
+  Performance:
+    - `on_tick` was to much, now it can be configured how often a ruin should be attempted to spawn
+  Rewrites:
+    - moved queue (ruins) handling to own LUA "class/library"
+    - moved excluding/reincluding surfaces to own LUA "class/library"
+---------------------------------------------------------------------------------------------------
 Version: 1.3.12
 Date: 2025-08-03
   Bugfixes:
