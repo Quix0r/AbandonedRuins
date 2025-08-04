@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.14
+Date: 2025-08-04
+  Minor:
+    - moved `spawn_chances` table from storage to local lua/spawning.lua "class'" property
+    - moved `ruin_sizes` table to lua/spawning.lua` "class`" property
+---------------------------------------------------------------------------------------------------
 Version: 1.3.13
 Date: 2025-08-03
   Performance:

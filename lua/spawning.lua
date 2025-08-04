@@ -4,6 +4,56 @@ local expressions = require("lua/expression_parsing")
 
 local spawning = {}
 
+-- Initial ruin sizes: small, medium, large
+---@type table<string>
+spawning.ruin_sizes = {"small", "medium", "large"}
+
+-- Spawn chances per table
+---@type tabe<string, double>
+spawning.spawn_chances = {}
+
+function spawning.init()
+  if debug_log then log("[init]: CALLED!") end
+
+  for _, size in pairs(spawning.ruin_sizes) do
+    spawning.spawn_chances[size] = 0.0
+  end
+
+  -- Init local tables, variables
+  local chances = {}
+  local thresholds = {}
+  local sumChance = 0.0
+
+  for _, size in pairs(spawning.ruin_sizes) do
+    chances[size] = settings.global["ruins-" .. size .. "-ruin-chance"].value
+    sumChance = sumChance + chances[size]
+    if debug_log then log(string.format("[init]: chances[%s]=%.2f", size, chances[size])) end
+  end
+
+  local totalChance = math.min(sumChance, 1)
+  if debug_log then log(string.format("[init]: sumChance=%.2f,totalChance=%.2f", sumChance, totalChance)) end
+
+  -- now compute cumulative distribution of conditional probabilities for
+  -- spawn_type given a spawn occurs.
+  for i, size in pairs(spawning.ruin_sizes) do
+    if debug_log then log(string.format("[init]: i=%d,size='%s'", i, size)) end
+    thresholds[size] = chances[size]  / sumChance * totalChance
+    if i > 1 then
+      -- Add threshold of previous ruin size
+      thresholds[size] = thresholds[size] + thresholds[spawning.ruin_sizes[i - 1]]
+    end
+    if debug_log then log(string.format("[init]: thresholds[%s]=%.2f", size, thresholds[size])) end
+  end
+
+  if debug_log then log(string.format("[init]: Adding %d thresholds ...", table_size(thresholds))) end
+  for size, threshold in pairs(thresholds) do
+    if debug_log then log(string.format("[init]: Adding/updating size='%s',threshold=%.2f ...", size, threshold)) end
+    spawning.spawn_chances[size] = threshold
+  end
+
+  if debug_log then log("[init]: EXIT!") end
+end
+
 ---@param half_size number
 ---@param center MapPosition
 ---@param surface LuaSurface
@@ -347,6 +397,19 @@ spawning.spawn_random_ruin = function(ruins, half_size, center, surface)
   end
 
   if debug_log then log("[spawn_random_ruin]: EXIT!") end
+end
+
+--- Returns spawning chance for given size
+spawning.get_spawn_chance = function(size)
+  if debug_log then log(string.format("[get_spawn_chance]: size[]='%s' - CALLED!", type(size))) end
+  if type(size) ~= "string" then
+    error(string.format("size[]='%s' is not expected type 'string'", type(size)))
+  elseif spawning.spawn_chanes[size] == nil then
+    error(string.format("size='%s' is not found in spawn_chanes table", size))
+  end
+
+  if debug_log then log(string.format("[get_spawn_chance]: spawning.spawn_chances[%s]=%.2f - EXIT!", size, spawning.spawn_chanes[size])) end
+  return spawning.spawn_chances[size]
 end
 
 return spawning
