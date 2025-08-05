@@ -77,17 +77,17 @@ local function no_corpse_fade(half_size, center, surface)
   if debug_log then log("[no_corpse_fade]: EXIT!") end
 end
 
----@param entity EntityExpression|string
+---@param expression EntityExpression|string
 ---@param relative_position MapPosition
 ---@param center MapPosition
 ---@param surface LuaSurface
 ---@param extra_options EntityOptions
 ---@param vars VariableValues
-local function spawn_entity(entity, relative_position, center, surface, extra_options, vars)
+local function spawn_entity(expression, relative_position, center, surface, extra_options, vars)
   if debug_log then
     log(string.format(
-      "[spawn_entity]: entity[]='%s',relative_position[]='%s',center[]='%s',surface[]='%s',extra_options[]='%s',vars[]='%s' - CALLED!",
-      type(entity),
+      "[spawn_entity]: expression[]='%s',relative_position[]='%s',center[]='%s',surface[]='%s',extra_options[]='%s',vars[]='%s' - CALLED!",
+      type(expression),
       type(relative_position),
       type(center),
       type(surface),
@@ -99,7 +99,7 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
     error(string.format("surface.name='%s' is not valid", surface.name))
   end
 
-  local entity_name = expressions.entity(entity, vars)
+  local entity_name = expressions.entity(expression, vars)
   if debug_log then log(string.format("[spawn_entity]: entity_name='%s'", entity_name)) end
 
   if _G["prototypes"].entity[entity_name] == nil then
@@ -114,16 +114,17 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
   end
   if debug_log then log(string.format("[spawn_entity]: force='%s' - AFTER!", force)) end
 
-  local recipe
-  if debug_log then log(string.format("[spawn_entity]: extra_options.recipe='%s'", extra_options.recipe)) end
+  --- @type string Recipe name
+  local recipe_name = nil
+  if debug_log then log(string.format("[spawn_entity]: extra_options.recipe[%s]='%s'", type(extra_options.recipe), extra_options.recipe)) end
   if type(extra_options.recipe) == "string" then
     if not _G["prototypes"].recipe[extra_options.recipe] then
       log(string.format("[spawn_entity]: extra_options.recipe='%s'' does not exist!", extra_options.recipe))
     else
-      recipe = extra_options.recipe
+      recipe_name = extra_options.recipe
     end
   end
-  if debug_log then log(string.format("[spawn_entity]: recipe[]='%s'", type(recipe))) end
+  if debug_log then log(string.format("[spawn_entity]: recipe_name[]='%s'", type(recipe_name))) end
 
   local e = surface.create_entity
   {
@@ -133,7 +134,7 @@ local function spawn_entity(entity, relative_position, center, surface, extra_op
     force       = force,
     raise_built = true,
     create_build_effect_smoke = false,
-    recipe      = recipe
+    recipe      = recipe_name
   }
 
   if debug_log then log(string.format("[spawn_entity]: e[]='%s',extra_options.dmg[]='%s'", type(e), type(extra_options.dmg))) end
@@ -276,7 +277,7 @@ local function parse_variables(variables)
       if debug_log then log(string.format("[parse_variables]: Parsing number expression for var.name='%s',var.value[]='%s' ...", var.name, type(var.value))) end
       parsed[var.name] = expressions.number(var.value)
     else
-      error(string.format("Unrecognized variable type: '%s'", var.type))
+      error(string.format("Unrecognized variable type: var.type='%s'. Valid are: 'entity-expression' and 'number-expression'", var.type))
     end
   end
 
@@ -305,12 +306,18 @@ local function clear_area(half_size, center, surface)
   end
 
   for _, entity in pairs(surface.find_entities_filtered({area = area, type = {"resource"}, invert = true})) do
-    if debug_log and not entity.valid then log("[clear_area]: Found an invalid entity ...")
-    elseif debug_log and entity.valid then log(string.format("[clear_area]: Found entity.type='%s',entity.name='%s' ...", entity.type, entity.name)) end
+    if debug_log and not entity.valid then
+      log("[clear_area]: Found an invalid entity ...")
+    elseif debug_log and entity.valid then
+      log(string.format("[clear_area]: Found entity.type='%s',entity.name='%s' ...", entity.type, entity.name))
+    end
 
     if (entity.valid and entity.type ~= "tree") or math.random() < (half_size / 14) then
-      if debug_log and not entity.valid then log("[clear_area]: Destroying invalid  ...")
-      elseif debug_log and entity.valid then log(string.format("[clear_area]: Destroying entity.name='%s' ...", entity.name)) end
+      if debug_log and not entity.valid then
+        log("[clear_area]: Destroying invalid entity ...")
+      elseif debug_log and entity.valid then
+        log(string.format("[clear_area]: Destroying entity.name='%s' ...", entity.name))
+      end
 
       entity.destroy({do_cliff_correction = true, raise_destroy = true})
     end

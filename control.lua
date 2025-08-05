@@ -317,14 +317,16 @@ remote.add_interface("AbandonedRuins",
   ---@deprecated
   add_ruin_set = function(name, small_ruins, medium_ruins, large_ruins)
     log(string.format("[add_ruin_set]: DEPECATED! This function only allows 'small', 'medium' and 'large'. Please use add_ruin_sets() instead! name='%s'", name))
+    game.print(string.format("The ruin-set '%s' has invoked a deprecated remote-call function 'add_ruin_set()'. Please inform your mod developer to switch to 'add_ruin_sets()' instead.", name))
+
     if type(name) ~= "string" then
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     elseif not (small_ruins and next(small_ruins)) then
-      error("[add_ruin_set]: Argument 'small_ruins' is an empty ruin set")
+      error("Argument 'small_ruins' is an empty ruin set")
     elseif not (medium_ruins and next(medium_ruins)) then
-      error("[add_ruin_set]: Argument 'medium_ruins' is an empty ruin set")
+      error("Argument 'medium_ruins' is an empty ruin set")
     elseif not (large_ruins and next(large_ruins)) then
-      error("[add_ruin_set]: Argument 'large_ruins' is an empty ruin set")
+      error("Argument 'large_ruins' is an empty ruin set")
     end
 
     _ruin_sets[name] = {
