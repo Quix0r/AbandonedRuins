@@ -404,11 +404,11 @@ spawning.get_spawn_chance = function(size)
   if debug_log then log(string.format("[get_spawn_chance]: size[]='%s' - CALLED!", type(size))) end
   if type(size) ~= "string" then
     error(string.format("size[]='%s' is not expected type 'string'", type(size)))
-  elseif spawning.spawn_chanes[size] == nil then
-    error(string.format("size='%s' is not found in spawn_chanes table", size))
+  elseif spawning.spawn_chances[size] == nil then
+    error(string.format("size='%s' is not found in spawn_chances table", size))
   end
 
-  if debug_log then log(string.format("[get_spawn_chance]: spawning.spawn_chances[%s]=%.2f - EXIT!", size, spawning.spawn_chanes[size])) end
+  if debug_log then log(string.format("[get_spawn_chance]: spawning.spawn_chances[%s]=%.2f - EXIT!", size, spawning.spawn_chances[size])) end
   return spawning.spawn_chances[size]
 end
 
