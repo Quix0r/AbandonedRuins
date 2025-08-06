@@ -30,17 +30,12 @@ end
 --- Get all ruins
 ---@return RuinQueueItem[]
 function queue.get_ruins()
-  if debug_log then log("[get_ruins]: CALLED!") end
   return queue.ruins
 end
 
 --- Resets queue for ruins
 function queue.reset_ruins()
-  if debug_log then log("[reset_ruins]: CALLED!") end
-
   queue.ruins = {}
-
-  if debug_log then log("[reset_ruins]: EXIT!") end
 end
 
 return queue

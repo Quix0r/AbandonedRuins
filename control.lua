@@ -33,10 +33,6 @@ local function init()
   ---@type boolean
   storage.spawn_ruins = storage.spawn_ruins or true
 
-  -- Table of exclusive ruinsets per surface
-  ---@type table<string, string> surface name, ruin-set name
-  storage.exclusive_ruinset = storage.exclusive_ruinset or {}
-
   if debug_log then log("[init]: EXIT!") end
 end
 
@@ -53,8 +49,10 @@ end)
 script.on_nth_tick(spawn_tick, function(event)
   if debug_on_tick then log(string.format("[on_tick]: event.tick=%d - CALLED!", event.tick)) end
 
-  ---@type string
+  ---@type RuinQueueItem[] All currently queued ruin-queue items
   local ruins = queue.get_ruins()
+
+  ---@type string
   local ruinset_name = settings.global[constants.CURRENT_RUIN_SET_KEY].value
 
   if debug_on_tick then log(string.format("[on_tick]: runins[]='%s',ruinset_name='%s'", type(ruins), ruinset_name)) end
@@ -62,19 +60,23 @@ script.on_nth_tick(spawn_tick, function(event)
     if debug_on_tick then log(string.format("[on_tick]: event.tick=%d has no ruins to spawn - EXIT!", event.tick)) end
     return
   elseif not _ruin_sets[ruinset_name] then
-    error(string.format("ruinset_name='%s' is not registered with this mod. Have you forgotten to remote-call `register_ruin_set`?", ruinset_name))
+    error(string.format("ruinset_name='%s' is not registered with this mod. Have you forgotten to invoke `utils.register_ruin_set()`?", ruinset_name))
   end
 
   if debug_on_tick then log(string.format("[on_tick]: Spawning %d random ruin sets ...", table_size(ruins))) end
-  for _, ruin in pairs(ruins) do
-    if debug_on_tick then log(string.format("[on_tick]: Spawning ruin.size='%s',ruin.center='%s',ruin.surface='%s' ...", ruin.size, tostring(ruin.center), tostring(ruin.surface))) end
-    if not utils.ruin_half_sizes[ruin.size] then
-      error(string.format("ruin.size='%s' is not registered in ruin_half_sizes table. Have you forgotten to remote-call `register_ruin_set`?", ruin.size))
+
+  ---@type RuinQueueItem Individual ruin-queue item
+  for _, queue_item in pairs(ruins) do
+    if debug_on_tick then log(string.format("[on_tick]: Spawning queue_item.size='%s',queue_item.center='%s',queue_item.surface='%s' ...", queue_item.size, tostring(queue_item.center), tostring(queue_item.surface))) end
+    if not utils.ruin_half_sizes[queue_item.size] then
+      error(string.format("queue_item.size='%s' is not registered in ruin_half_sizes table. Have you forgotten to invoke `utils.register_ruin_set()`?", queue_item.size))
     end
-    if storage.exclusive_ruinset[ruin.surface.name] == nil or ruinset_name == storage.exclusive_ruinset[ruin.surface.name] then
+    if spawning.no_spawning[queue_item.surface.name] ~= nil and ruinset_name == spawning.no_spawning[queue_item.surface.name] then
+      if debug_on_tick then log(string.format("[on_tick]: ruinset_name='%s' is not allowed to spawn on surface='%s' - SKIPPED!", ruinset_name, queue_item.surface.name)) end
+    elseif spawning.exclusive_ruinset[queue_item.surface.name] == nil or ruinset_name == spawning.exclusive_ruinset[queue_item.surface.name] then
       -- The ruin-set is either marked as non-exclusive or it surface and ruin-set name are matching
-      if debug_on_tick then log(string.format("[on_tick]: Invoking spawning.spawn_random_ruin() with ruinset_name='%s',ruin.size='%s' ...", ruinset_name, ruin.size)) end
-      spawning.spawn_random_ruin(_ruin_sets[ruinset_name][ruin.size], utils.ruin_half_sizes[ruin.size], ruin.center, ruin.surface)
+      if debug_on_tick then log(string.format("[on_tick]: Invoking spawning.spawn_random_ruin() with ruinset_name='%s',queue_item.size='%s' ...", ruinset_name, queue_item.size)) end
+      spawning.spawn_random_ruin(_ruin_sets[ruinset_name][queue_item.size], utils.ruin_half_sizes[queue_item.size], queue_item.center, queue_item.surface)
     end
   end
 
@@ -260,7 +262,9 @@ remote.add_interface("AbandonedRuins",
   ---@return table
   get_ruin_sizes = function() return spawning.ruin_sizes end,
 
-  -- Any surface whose name contains this string will not have ruins generated on it.
+  -- Any surface whose name contains this string will not have any ruins from any ruin-set mod spawned on it.
+  -- Please note, that this feature is intended for "internal" or "hidden" surfaces, such as `NiceFill` uses
+  -- and not for having an entire planet not having any ruins spawned.
   ---@param name string
   exclude_surface = function(name)
     if debug_log then log(string.format("[exclude_surface]: name[]='%s',ruin_sets[]='%s' - CALLED!", type(name), type(ruin_sets))) end
@@ -358,18 +362,41 @@ remote.add_interface("AbandonedRuins",
   end,
 
   -- Registers ruin-set name as exclusive to only one surface
+  ---@param surface_name string Surface's name to the ruin-set should be exclusive to
+  ---@param ruinset_name string Name of the ruin-set that is exclusive to given surface (aka. planet/moon)
   spawn_exclusively_on = function(surface_name, ruinset_name)
     if debug_log then log(string.format("[spawn_exclusively_on]: surface_name[]='%s',ruinset_name[]='%s' - CALLED!", type(surface_name), type(ruinset_name))) end
     if type(surface_name) ~= "string" then
       error(string.format("surface_name[]='%s' is not expected type 'string'", type(surface_name)))
     elseif type(ruinset_name) ~= "string" then
       error(string.format("ruinset_name[]='%s' is not expected type 'string'", type(ruinset_name)))
+    elseif spawning.no_spawning[surface_name] ~= nil and ruinset_name == spawning.no_spawning[surface_name] then
+      error(string.format("ruinset_name='%s' is marked for 'no-spawning' at surface_name='%s' which is the opposite of exclusive", ruinset_name, surface_name))
     end
 
     if debug_log then log(string.format("[spawn_exclusively_on]: Registering surface_name='%s',ruinset_name='%s' as exclusive ...", surface_name, ruinset_name)) end
-    storage.exclusive_ruinset[surface_name] = ruinset_name
+    spawning.exclusive_ruinset[surface_name] = ruinset_name
 
     if debug_log then log("[spawn_exclusively_on]: EXIT!") end
+  end,
+
+  -- Registers ruin-set name as exclusive to only one surface
+  ---@param surface_name string Surface's name to the ruin-set should be exclusive to
+  ---@param ruinset_name string Name of the ruin-set that is exclusive to given surface (aka. planet/moon)
+  no_spawning_on = function(surface_name, ruinset_name)
+    if debug_log then log(string.format("[no_spawning_on]: surface_name[]='%s',ruinset_name[]='%s' - CALLED!", type(surface_name), type(ruinset_name))) end
+    if type(surface_name) ~= "string" then
+      error(string.format("surface_name[]='%s' is not expected type 'string'", type(surface_name)))
+    elseif type(ruinset_name) ~= "string" then
+      error(string.format("ruinset_name[]='%s' is not expected type 'string'", type(ruinset_name)))
+    elseif spawning.exclusive_ruinset[surface_name] ~= nil and ruinset_name == spawning.exclusive_ruinset[surface_name] then
+      error(string.format("ruinset_name='%s' is marked for exclusive spawning at surface_name='%s' which is the opposite of 'no-spawning'", ruinset_name, surface_name))
+    end
+
+    if debug_log then log(string.format("[no_spawning_on]: Registering surface_name='%s',ruinset_name='%s' as 'no-spawning' ...", surface_name, ruinset_name)) end
+    spawning.no_spawning[surface_name] = ruinset_name
+
+    if debug_log then log("[no_spawning_on]: EXIT!") end
   end,
 })
 

@@ -12,6 +12,14 @@ spawning.ruin_sizes = {"small", "medium", "large"}
 ---@type tabe<string, double>
 spawning.spawn_chances = {}
 
+-- Table of exclusive ruinsets per surface
+---@type table<string, string> surface name, ruin-set name
+spawning.exclusive_ruinset = {}
+
+-- Table of "no-spawning" per surface (see same `no_spawning` in mod AbandondedRuins-base for a per-ruin setting)
+---@type table<string, string> surface name, ruin-set name
+spawning.no_spawning = {}
+
 function spawning.init()
   if debug_log then log("[init]: CALLED!") end
 
@@ -345,19 +353,19 @@ spawning.spawn_ruin = function(ruin, half_size, center, surface)
     local variables = {}
     if debug_log then log(string.format("[spawn_ruin]: ruin.variables[]='%s'", type(ruin.variables))) end
     if ruin.variables ~= nil and table_size(ruin.variables) > 0 then
-      if debug_log then log(string.format("[spawn_ruin]: Ruin has %d variables to parse.", table_size(ruin.variables))) end
+      if debug_log then log(string.format("[spawn_ruin]: Ruin '%s' has %d variables to parse.", utils.get_ruin_name(ruin), table_size(ruin.variables))) end
       variables = parse_variables(ruin.variables)
     end
     if debug_log then log(string.format("[spawn_ruin]: variables()=%d,ruin.entities[]='%s'", table_size(variables), type(ruin.entities))) end
 
     if ruin.entities ~= nil and table_size(ruin.entities) > 0 then
-      if debug_log then log(string.format("[spawn_ruin]: Ruin has %d entities to spawn.", table_size(ruin.entities))) end
+      if debug_log then log(string.format("[spawn_ruin]: Ruin '%s' has %d entities to spawn.", utils.get_ruin_name(ruin), table_size(ruin.entities))) end
       spawn_entities(ruin.entities, center, surface, variables)
     end
 
     if debug_log then log(string.format("[spawn_ruin]: ruin.tiles[]='%s'", type(ruin.tiles))) end
     if ruin.tiles ~= nil and table_size(ruin.tiles) > 0 then
-      if debug_log then log(string.format("[spawn_ruin]: Ruin has %d tiles to spawn.", table_size(ruin.tiles))) end
+      if debug_log then log(string.format("[spawn_ruin]: Ruin '%s' has %d tiles to spawn.", utils.get_ruin_name(ruin), table_size(ruin.tiles))) end
       spawn_tiles(ruin.tiles, center, surface)
     end
 
@@ -376,7 +384,7 @@ spawning.spawn_random_ruin = function(ruins, half_size, center, surface)
   if table_size(ruins) == 0 then
     error("[spawn_random_ruin]: Array 'ruins' is empty")
   elseif not surface.valid then
-    error(string.format("surface.name='%s' is not valid", surface.name))
+    error(string.format("surface[]='%s' is not valid", type(surface)))
   elseif surface.name == constants.DEBUG_SURFACE_NAME then
     error(string.format("Debug surface '%s' has no random ruin spawning.", surface.name))
   end
@@ -395,6 +403,9 @@ spawning.spawn_random_ruin = function(ruins, half_size, center, surface)
     if ruin.spawn_on_surfaces ~= nil and (ruin.spawn_on_surfaces[surface.name] == nil or not ruin.spawn_on_surfaces[surface.name]) then
       -- Ruin is not allowed on this surface
       if debug_log then log(string.format("[spawn_random_ruin]: Ruin '%s' is not allowed to spawn on surface '%s' - SKIPPED!", name, surface.name)) end
+      ruin = nil
+    elseif ruin.no_spawning ~= nil and ruin.no_spawning[surface.name] then
+      if debug_log then log(string.format("[spawn_random_ruin]: Surface '%s' is banned from spawning ruin 's%s' - SKIPPED!", surface.name, name)) end
       ruin = nil
     else
       -- Spawn ruin
