@@ -42,7 +42,7 @@ luac.out
 *.x86_64
 *.hex
 
--.DS_Store
--.vscode
--.modportal
--.assets
+.DS_Store
+.vscode
+.modportal
+.assets
