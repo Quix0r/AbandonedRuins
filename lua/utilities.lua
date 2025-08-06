@@ -140,11 +140,13 @@ end
 ---@return LuaForce
 local function setup_enemy_force()
   ---@type LuaForce
+  if debug_log then log("[setup_enemy_force]: CALLED!") end
   local enemy_force = game.forces["AbandonedRuins:enemy"] or game.create_force("AbandonedRuins:enemy")
 
   util.set_enemy_force_diplomacy(enemy_force, false)
   storage.enemy_force = enemy_force
 
+  if debug_log then log(string.format("[setup_enemy_force]: enemy_force[]='%s' - EXIT!", type(enemy_force))) end
   return enemy_force
 end
 
@@ -191,6 +193,20 @@ util.get_ruin_name = function(ruin)
   end
 
   return ruin
+end
+
+-- Outputs game message, if `game` is populated, otherwise it will be logged
+---@param message string Message to be printed out or logged
+util.output_message = function(message)
+  if type(message) ~= "string" then
+    error(string.format("message[]='%s' is not of expected type 'string'", type(message)))
+  end
+
+  if game then
+    game.print(message)
+  else
+    log(message)
+  end
 end
 
 return util

@@ -53,7 +53,7 @@ script.on_event(defines.events.on_player_created, function(event)
   log(string.format("[on_player_created]: ruin_set[]='%s'", type(ruin_set)))
   if ruin_set == nil then
     -- Issue notice
-    game.print("Abandoned Ruins: No ruins loaded! Will not create debug world.")
+    utils.output_message("Abandoned Ruins: No ruins loaded! Will not create debug world.")
     return
   end
 
@@ -73,7 +73,7 @@ script.on_event(defines.events.on_player_created, function(event)
 
   -- skip invalid surfaces
   if not surface.valid then
-    game.print(string.format("Abandoned Ruins: Invalid surface created: '%s'", constants.DEBUG_SURFACE_NAME))
+    utils.output_message(string.format("Abandoned Ruins: Invalid surface created: '%s'", constants.DEBUG_SURFACE_NAME))
     log(string.format("WARNING: surface[]='%s',name='%s' is not valid - EXIT!", type(surface), constants.DEBUG_SURFACE_NAME))
     return
   end

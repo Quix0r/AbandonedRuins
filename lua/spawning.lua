@@ -24,6 +24,7 @@ function spawning.init()
   if debug_log then log("[init]: CALLED!") end
 
   for _, size in pairs(spawning.ruin_sizes) do
+    if debug_log then log(string.format("[init]: Setting chance=0.0 for size='%s' ...", size)) end
     spawning.spawn_chances[size] = 0.0
   end
 

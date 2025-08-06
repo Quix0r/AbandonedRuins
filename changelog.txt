@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.18
+Date: 2025-08-06
+  Bugfixes:
+    - need to run `init()` also during `on_load` as `spawn_changes` and others are now moved away,
+      thanks to @Silly_Warlock for mentioning this
+  Minor:
+    - introduced wrapper function `utils.output_message()` to avoid crashes due to missing `game`
+---------------------------------------------------------------------------------------------------
 Version: 1.3.17
 Date: 2025-08-06
   Features:

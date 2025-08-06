@@ -17,12 +17,16 @@ local on_entity_force_changed_event = script.generate_event_name()
 local function update_debug_log()
   debug_log = settings.global[constants.ENABLE_DEBUG_LOG_KEY].value
   debug_on_tick = settings.global["ruins-enable-debug-on-tick"].value
-  game.print(string.format("Ruins: debug log is now: debug=%s,on_tick=%s", debug_log, debug_on_tick))
+  utils.output_message(string.format("Ruins: debug log is now: debug=%s,on_tick=%s", debug_log, debug_on_tick))
 end
 
 local function init()
   if debug_log then log("[init]: CALLED!") end
-  utils.set_enemy_force_cease_fire(utils.get_enemy_force(), not settings.global["ruins-enemy-not-cease-fire"].value)
+  if game then
+    utils.set_enemy_force_cease_fire(utils.get_enemy_force(), not settings.global["ruins-enemy-not-cease-fire"].value)
+  else
+    log("[init]: Cannot intitialize enemy force' cease fire, this is normal during on_load event.")
+  end
 
   -- Initialize spawn changes array (isn't stored in save-game)
   spawning.init()
@@ -37,6 +41,7 @@ local function init()
 end
 
 script.on_init(init)
+script.on_load(init)
 script.on_configuration_changed(init)
 script.on_event(defines.events.on_player_created, update_debug_log)
 script.on_event(defines.events.on_runtime_mod_setting_changed, init)
@@ -154,10 +159,10 @@ script.on_event(defines.events.on_chunk_generated, function (event)
   local center       = utils.get_center_of_chunk(event.position)
   local min_distance = settings.global["ruins-min-distance-from-spawn"].value
   local spawn_chance = math.random()
-  if debug_log then log(string.format("[on_chunk_generated]: center.x=%d,center.y=%d,min_distance=%d,spawn_chance=%2.f", center.x, center.y, min_distance, spawn_chance)) end
+  if debug_log then log(string.format("[on_chunk_generated]: center.x=%d,center.y=%d,min_distance=%d,spawn_chance=%.2f", center.x, center.y, min_distance, spawn_chance)) end
 
   for _, size in pairs(spawning.ruin_sizes) do
-    if debug_log then log(string.format("[on_chunk_generated]: size='%s'", size)) end
+    if debug_log then log(string.format("[on_chunk_generated]: spawn_chance=%.2f,size[%s]='%s'", spawn_chance, type(size), size)) end
     if spawn_chance <= spawning.get_spawn_chance(size) then
       if debug_log then log(string.format("[on_chunk_generated]: Trying to spawn ruin of size='%s' at event.surface='%s' ...", size, event.surface)) end
       try_ruin_spawn(size, min_distance, center, event.surface, event.tick)
@@ -321,7 +326,7 @@ remote.add_interface("AbandonedRuins",
   ---@deprecated
   add_ruin_set = function(name, small_ruins, medium_ruins, large_ruins)
     log(string.format("[add_ruin_set]: DEPECATED! This function only allows 'small', 'medium' and 'large'. Please use add_ruin_sets() instead! name='%s'", name))
-    game.print(string.format("The ruin-set '%s' has invoked a deprecated remote-call function 'add_ruin_set()'. Please inform your mod developer to switch to 'add_ruin_sets()' instead.", name))
+    utils.output_message(string.format("The ruin-set '%s' has invoked a deprecated remote-call function 'add_ruin_set()'. Please inform your mod developer to switch to 'add_ruin_sets()' instead.", name))
 
     if type(name) ~= "string" then
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
@@ -415,7 +420,7 @@ remote.add_interface("AbandonedRuins",
         local old_force = event.force
         local new_force = entity.force
         -- handle the force change
-        game.print("old: " .. old_force.name .. " new: " .. new_force.name)
+        utils.output_message("old: " .. old_force.name .. " new: " .. new_force.name)
       end)
     end
   end
