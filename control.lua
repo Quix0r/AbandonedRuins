@@ -366,7 +366,7 @@ remote.add_interface("AbandonedRuins",
     return _ruin_sets[settings.global[constants.CURRENT_RUIN_SET_KEY].value]
   end,
 
-  -- Registers ruin-set name as exclusive to only one surface
+  -- Registers ruin-set name as exclusive to a surface
   ---@param surface_name string Surface's name to the ruin-set should be exclusive to
   ---@param ruinset_name string Name of the ruin-set that is exclusive to given surface (aka. planet/moon)
   spawn_exclusively_on = function(surface_name, ruinset_name)
@@ -385,7 +385,7 @@ remote.add_interface("AbandonedRuins",
     if debug_log then log("[spawn_exclusively_on]: EXIT!") end
   end,
 
-  -- Registers ruin-set name as exclusive to only one surface
+  -- Registers ruin-set name as "no-spawning" to a surface. This means that ruins from given set will not spawn on given surface.
   ---@param surface_name string Surface's name to the ruin-set should be exclusive to
   ---@param ruinset_name string Name of the ruin-set that is exclusive to given surface (aka. planet/moon)
   no_spawning_on = function(surface_name, ruinset_name)
