@@ -275,6 +275,8 @@ remote.add_interface("AbandonedRuins",
     if debug_log then log(string.format("[exclude_surface]: name[]='%s',ruin_sets[]='%s' - CALLED!", type(name), type(ruin_sets))) end
     if type(name) ~= "string" then
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+    elseif data.raw["planet"][name] ~= nil or data.raw["space-location"][name] ~= nil then
+      error(string.format("name='%s' is a valid planet or space-location. This function is for internal surfaces only. If you want your ruins not spawning on a certain planet, use `no_spawning` for individual ruins or invoke the remote-call function `no_spawning_on` to exclude your ruin-set from a planet entirely.", name))
     end
 
     if debug_log then log(string.format("[exclude_surface]: Excluding surface name='%s' ...", name)) end
@@ -315,34 +317,6 @@ remote.add_interface("AbandonedRuins",
     _ruin_sets[name] = ruin_sets
 
     if debug_log then log("[add_ruin_sets]: EXIT!") end
-  end,
-
-  -- The ruins should have the sizes given in utils.ruin_half_sizes, e.g. ruins in the small_ruins array should be 8x8 tiles.
-  -- See also: docs/ruin_sets.md
-  ---@param name string
-  ---@param small_ruins Ruin[]
-  ---@param medium_ruins Ruin[]
-  ---@param large_ruins Ruin[]
-  ---@deprecated
-  add_ruin_set = function(name, small_ruins, medium_ruins, large_ruins)
-    log(string.format("[add_ruin_set]: DEPECATED! This function only allows 'small', 'medium' and 'large'. Please use add_ruin_sets() instead! name='%s'", name))
-    utils.output_message(string.format("The ruin-set '%s' has invoked a deprecated remote-call function 'add_ruin_set()'. Please inform your mod developer to switch to 'add_ruin_sets()' instead.", name))
-
-    if type(name) ~= "string" then
-      error(string.format("name[]='%s' is not expected type 'string'", type(name)))
-    elseif not (small_ruins and next(small_ruins)) then
-      error("Argument 'small_ruins' is an empty ruin set")
-    elseif not (medium_ruins and next(medium_ruins)) then
-      error("Argument 'medium_ruins' is an empty ruin set")
-    elseif not (large_ruins and next(large_ruins)) then
-      error("Argument 'large_ruins' is an empty ruin set")
-    end
-
-    _ruin_sets[name] = {
-      small  = small_ruins,
-      medium = medium_ruins,
-      large  = large_ruins
-    }
   end,
 
   -- !! The ruins sets are not saved or loaded. !!

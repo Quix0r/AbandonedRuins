@@ -1,4 +1,18 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.0
+Date: 2025-08-24
+  Cleanup:
+    - removed deprecated remote-call function "add_ruin_set". Please use "add_ruin_sets" with
+      your whole ruin-set instead
+  Breaking changes:
+    - remote-call function "exclude_surface" was misused for excluding whole planets from spawning
+      ruins of a certain set. This is not how it works. "exclude_surface" is for internal surfaces
+      which mods such as "control-room" or `NiceFill` use to work.
+    - so if you wish to exclude your ruin-set from a planet, use the remote-call function
+      "no_spawning_on" instead. Or if you wish only a few ruins should not spawn on a certain planet
+      add ed the `no_spawning` key to your ruin.
+    - The mod `AbandonedRuins-base` provides all needed documentation
+---------------------------------------------------------------------------------------------------
 Version: 1.3.18
 Date: 2025-08-06
   Bugfixes:
