@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.1
+Date: 2025-08-25
+  Minor:
+    - introduced utils.list_contains() which checks if a certain value is present in given
+      "list"
+    - added some sanity-checks to make sure only valid parameters can pass
+    - removed unused parameter `tick`, it was present in former release but now since
+      on_nth_tick() is being waited on, the delay should be enough
+---------------------------------------------------------------------------------------------------
 Version: 1.4.0
 Date: 2025-08-24
   Cleanup:

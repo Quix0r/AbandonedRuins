@@ -74,7 +74,7 @@ util.safe_insert_fluid = function(entity, fluid_dict)
         amount = amount
       })
     else
-      log(string.format("[safe_insert_fluid]: name='%s' is not a valid fluid to insert", name))
+      log(string.format("[safe_insert_fluid]: name='%s' is not a valid fluid to insert into entity.name='%s'", name, entity.name))
     end
   end
 
@@ -207,6 +207,26 @@ util.output_message = function(message)
   else
     log(message)
   end
+end
+
+-- Checks if given value is found in list
+---@param list {} A list of values
+---@param value any Any value to be found in list
+---@return found bool
+util.list_contains = function (list, value)
+  if debug_log then log(string.format("[list_contains]: list[]='%s',value[]='%s' - CALLED!", type(list), type(value))) end
+  local found = false
+
+  for i=1, #list do
+    if list[i] == value then
+      if debug_log then log(string.format("[list_contains]: value[]='%s' was found at i=%d - BREAK!", type(value), i)) end
+      found = true
+      break
+    end
+  end
+
+  if debug_log then log(string.format("[list_contains]: found=%s - EXIT!", found)) end
+  return found
 end
 
 return util

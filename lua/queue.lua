@@ -1,6 +1,7 @@
 local constants = require("constants")
 local utils = require("utilities")
 local surfaces = require("surfaces")
+local spawning = require("spawning")
 
 --- "Class/library" for ruin queue
 local queue = {}
@@ -9,20 +10,28 @@ local queue = {}
 ---@type RuinQueueItem[]
 queue.ruins = {}
 
--- This delays ruin spawning to the next n-th tick. This is done because on_chunk_generated may be called before other mods have a chance to do the remote call for the ruin set:
--- ThisMod_onInit -> SomeOtherMod_generatesChunks -> ThisMod_onChunkGenerated (ruin is queued) -> RuinPack_onInit (ruin set remote call) -> ThisMod_OnTick (ruin set is used)
----@param tick uint
----@param ruin RuinQueueItem
-function queue.add_ruin(tick, ruin)
-  if debug_log then log(string.format("[add_ruin]: tick[]='%s',ruin[]='%s' - CALLED!", type(tick), type(ruin))) end
-  if ruin.surface.name == constants.DEBUG_SURFACE_NAME then
-    error(string.format("Debug surface '%s' has no random ruin spawning.", ruin.surface.name))
-  elseif utils.str_contains_any_from_table(ruin.surface.name, surfaces.get_all()) then
-    error(string.format("ruin.surface.name='%s' is excluded - EXIT!", ruin.surface.name))
+-- Adds given ruin to the queue. So next invocation of on_nth_tick() will spawn it
+---@param queue_item RuinQueueItem Must contain 'surface' (LuaSurface), 'size' (string) and 'center' (LuaPosition)
+function queue.add_ruin(queue_item)
+  if debug_log then log(string.format("[add_ruin]: queue_item[]='%s' - CALLED!", type(queue_item))) end
+  if type(queue_item) ~= "table" then
+    error(string.format("Parameter queue_item[]='%s' is not of unexpected type 'table'", type(queue_item)))
+  elseif type(queue_item.surface) ~= "userdata" then
+    error(string.format("Table queue_item.surface[]='%s' is not of unexpected type 'userdata'", type(queue_item.surface)))
+  elseif queue_item.surface.name == constants.DEBUG_SURFACE_NAME then
+    error(string.format("Debug surface '%s' has no random ruin spawning.", queue_item.surface.name))
+  elseif utils.str_contains_any_from_table(queue_item.surface.name, surfaces.get_all_excluded()) then
+    error(string.format("queue_item.surface.name='%s' is excluded - EXIT!", queue_item.surface.name))
+  elseif type(queue_item.size) ~= "string" then
+    error(string.format("Table queue_item.size[]='%s' is not of unexpected type 'string'", type(queue_item.size)))
+  elseif not utils.list_contains(spawning.ruin_sizes, queue_item.size) then
+    error(string.format("queue_item.size='%s' is not a valid ruin size", queue_item.size))
+  elseif type(queue_item.center) ~= "table" then
+    error(string.format("Table queue_item.center[]='%s' is not of unexpected type 'table'", type(queue_item.center)))
   end
 
-  if debug_log then log(string.format("[add_ruin]: Queueing ruin[]='%s' ...", type(ruin))) end
-  queue.ruins[#queue.ruins] = ruin
+  if debug_log then log(string.format("[add_ruin]: Queueing queue_item[]='%s' ...", type(queue_item))) end
+  queue.ruins[#queue.ruins] = queue_item
 
   if debug_log then log("[add_ruin]: EXIT!") end
 end

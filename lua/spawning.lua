@@ -382,8 +382,12 @@ end
 ---@param surface LuaSurface
 spawning.spawn_random_ruin = function(ruins, half_size, center, surface)
   if debug_log then log(string.format("[spawn_random_ruin]: ruins[]='%s',half_size[]='%s',center[]='%s',surface[]='%s' - CALLED!", type(ruins), type(half_size), type(center), type(surface))) end
-  if table_size(ruins) == 0 then
-    error("[spawn_random_ruin]: Array 'ruins' is empty")
+  if type(ruins) ~= "table" then
+    error(string.format("Parameter ruins[]='%s' is not of expected type 'table'", type(ruins)))
+  elseif type(half_size) ~= "number" then
+    error(string.format("Parameter half_size[]='%s' is not of expected type 'number'", type(half_size)))
+  elseif table_size(ruins) == 0 then
+    error("Array 'ruins' is empty")
   elseif not surface.valid then
     error(string.format("surface[]='%s' is not valid", type(surface)))
   elseif surface.name == constants.DEBUG_SURFACE_NAME then

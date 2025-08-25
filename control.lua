@@ -95,18 +95,19 @@ end)
 ---@param min_distance number
 ---@param center MapPosition
 ---@param surface LuaSurface
----@param tick uint
-local function try_ruin_spawn(size, min_distance, center, surface, tick)
-  if debug_log then log(string.format("[try_ruin_spawn]: size='%s',min_distance=%d,center[]='%s',surface[]='%s',tick=%d - CALLED!", size, min_distance, type(center), type(surface), tick)) end
+local function try_ruin_spawn(size, min_distance, center, surface)
+  if debug_log then log(string.format("[try_ruin_spawn]: size='%s',min_distance=%d,center[]='%s',surface[]='%s' - CALLED!", size, min_distance, type(center), type(surface))) end
   if type(size) ~= "string" then
     error(string.format("size[]='%s' is not expected type 'string'", type(size)))
-  elseif type(min_distance) ~= "number" then
-    error(string.format("min_distance[]='%s' is not expected type 'string'", type(min_distance)))
+  elseif not utils.list_contains(spawning.ruin_sizes, size) then
+    error(string.format("size='%s' is not a valid ruin size", size))
   elseif utils.ruin_min_distance_multiplier[size] == nil then
     error(string.format("size='%s' is not found in multiplier table", size))
+  elseif type(min_distance) ~= "number" then
+    error(string.format("min_distance[]='%s' is not expected type 'string'", type(min_distance)))
   elseif surface.name == constants.DEBUG_SURFACE_NAME then
     error(string.format("Debug surface '%s' has no random ruin spawning.", surface.name))
-  elseif utils.str_contains_any_from_table(surface.name, surfaces.get_all()) then
+  elseif utils.str_contains_any_from_table(surface.name, surfaces.get_all_excluded()) then
     error(string.format("surface.name='%s' is excluded - EXIT!", surface.name))
   elseif settings.global[constants.CURRENT_RUIN_SET_KEY].value == constants.NONE then
     error("No ruin-set selected by player but this function was invoked. This should not happen.")
@@ -131,7 +132,7 @@ local function try_ruin_spawn(size, min_distance, center, surface, tick)
   end
   if debug_log then log(string.format("[try_ruin_spawn]: variance=%.2f,center.x=%d,center.y=%d - AFTER!", variance, center.x, center.y)) end
 
-  queue.add_ruin(tick, {
+  queue.add_ruin({
     size    = size,
     center  = center,
     surface = surface
@@ -151,7 +152,7 @@ script.on_event(defines.events.on_chunk_generated, function (event)
   elseif settings.global[constants.CURRENT_RUIN_SET_KEY].value == constants.NONE then
     if debug_log then log("[on_chunk_generated]: No ruin-set selected by player - EXIT!") end
     return
-  elseif utils.str_contains_any_from_table(event.surface.name, surfaces.get_all()) then
+  elseif utils.str_contains_any_from_table(event.surface.name, surfaces.get_all_excluded()) then
     if debug_log then log(string.format("[on_chunk_generated]: event.surface.name='%s' is excluded - EXIT!", event.surface.name)) end
     return
   end
@@ -165,7 +166,7 @@ script.on_event(defines.events.on_chunk_generated, function (event)
     if debug_log then log(string.format("[on_chunk_generated]: spawn_chance=%.2f,size[%s]='%s'", spawn_chance, type(size), size)) end
     if spawn_chance <= spawning.get_spawn_chance(size) then
       if debug_log then log(string.format("[on_chunk_generated]: Trying to spawn ruin of size='%s' at event.surface='%s' ...", size, event.surface)) end
-      try_ruin_spawn(size, min_distance, center, event.surface, event.tick)
+      try_ruin_spawn(size, min_distance, center, event.surface)
 
       if debug_log then log("[on_chunk_generated]: Ruin was attempted to spawn - BREAK!") end
       break
@@ -250,10 +251,10 @@ remote.add_interface("AbandonedRuins",
     if debug_log then log(string.format("[add_ruin_size]: size[]='%s',half_size[]='%s' - CALLED!", type(size), type(half_size))) end
     if type(size) ~= "string" then
       error(string.format("size[]='%s' is not expected type 'string'", type(size)))
+    elseif utils.list_contains(spawning.ruin_sizes, size) then
+      error(string.format("size='%s' is already added as ruin size", size))
     elseif type(half_size) ~= "number" then
       error(string.format("half_size[]='%s' is not expected type 'number'", type(half_size)))
-    elseif spawning.ruin_sizes[size] ~= nil then
-      error(string.format("size='%s' is already added as ruin size", size))
     end
 
     if debug_log then log(string.format("[add_ruin_size]: Adding ruin size='%s',half_size=%d ...", size, half_size)) end
