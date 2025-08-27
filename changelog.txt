@@ -1,4 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.2
+Date: 2025-08-27
+  Minor:
+    - moved icon graphics into own sub-directory
+    - introduced spawning.allow_spawning_on() which checks if spawning on surface is allowed for
+      given ruin-set name
+    - renamed `surfaces.excluded_surfaces` to `excluded` as the 2nd `surfaces` would be redundant
+    - introduced surfaces.is_excluded() which checks if surface name is in exclusion table, this
+      should allow repeated remote-calls on "exclude_surface" and "reinclude_surface" without
+      causing any crashes, but the "inner" function needs to check the exclusion status
+---------------------------------------------------------------------------------------------------
 Version: 1.4.1
 Date: 2025-08-25
   Minor:

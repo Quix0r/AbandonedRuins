@@ -422,7 +422,9 @@ spawning.spawn_random_ruin = function(ruins, half_size, center, surface)
   if debug_log then log("[spawn_random_ruin]: EXIT!") end
 end
 
---- Returns spawning chance for given size
+-- Returns spawning chance for given size
+---@param size string
+---@return float Spawning chance
 spawning.get_spawn_chance = function(size)
   if debug_log then log(string.format("[get_spawn_chance]: size[]='%s' - CALLED!", type(size))) end
   if type(size) ~= "string" then
@@ -433,6 +435,25 @@ spawning.get_spawn_chance = function(size)
 
   if debug_log then log(string.format("[get_spawn_chance]: spawning.spawn_chances[%s]=%.2f - EXIT!", size, spawning.spawn_chances[size])) end
   return spawning.spawn_chances[size]
+end
+
+-- Checks if spawning is allowed on given surface for ruinset name
+---@param surface LuaSurface
+---@param ruinset_name string
+---@return boolean Whether spawning of given ruin-set is allowed on surface
+spawning.allow_spawning_on = function (surface, ruinset_name)
+  if debug_log then log(string.format("[allow_spawning_on]: surface[]='%s',ruinset_name[]='%s' - CALLED!", type(surface), type(ruinset_name))) end
+  if type(surface) ~= "userdata" then
+    error(string.format("surface[]='%s' is not expected type 'userdata'", type(surface)))
+  elseif type(ruinset_name) ~= "string" then
+    error(string.format("ruinset_name[]='%s' is not expected type 'string'", type(ruinset_name)))
+  end
+
+  if debug_log then log(string.format("[allow_spawning_on]: Checking surface.name='%s',ruinset_name='%s' ...", surface.name, ruinset_name)) end
+  local allow = spawning.no_spawning[surface.name] ~= nil and ruinset_name == spawning.no_spawning[surface.name]
+
+  if debug_log then log(string.format("[allow_spawning_on]: allow='%s' - EXIT!", allow)) end
+  return allow
 end
 
 return spawning

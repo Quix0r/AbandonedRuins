@@ -76,7 +76,8 @@ script.on_nth_tick(spawn_tick, function(event)
     if not utils.ruin_half_sizes[queue_item.size] then
       error(string.format("queue_item.size='%s' is not registered in ruin_half_sizes table. Have you forgotten to invoke `utils.register_ruin_set()`?", queue_item.size))
     end
-    if spawning.no_spawning[queue_item.surface.name] ~= nil and ruinset_name == spawning.no_spawning[queue_item.surface.name] then
+
+    if not spawning.allow_spawning_on(queue_item.surface, ruinset_name) then
       if debug_on_tick then log(string.format("[on_tick]: ruinset_name='%s' is not allowed to spawn on surface='%s' - SKIPPED!", ruinset_name, queue_item.surface.name)) end
     elseif spawning.exclusive_ruinset[queue_item.surface.name] == nil or ruinset_name == spawning.exclusive_ruinset[queue_item.surface.name] then
       -- The ruin-set is either marked as non-exclusive or it surface and ruin-set name are matching
@@ -108,7 +109,7 @@ local function try_ruin_spawn(size, min_distance, center, surface)
   elseif surface.name == constants.DEBUG_SURFACE_NAME then
     error(string.format("Debug surface '%s' has no random ruin spawning.", surface.name))
   elseif utils.str_contains_any_from_table(surface.name, surfaces.get_all_excluded()) then
-    error(string.format("surface.name='%s' is excluded - EXIT!", surface.name))
+    error(string.format("surface.name='%s' is excluded, cannot spawn ruins on", surface.name))
   elseif settings.global[constants.CURRENT_RUIN_SET_KEY].value == constants.NONE then
     error("No ruin-set selected by player but this function was invoked. This should not happen.")
   end
@@ -280,8 +281,10 @@ remote.add_interface("AbandonedRuins",
       error(string.format("name='%s' is a valid planet or space-location. This function is for internal surfaces only. If you want your ruins not spawning on a certain planet, use `no_spawning` for individual ruins or invoke the remote-call function `no_spawning_on` to exclude your ruin-set from a planet entirely.", name))
     end
 
-    if debug_log then log(string.format("[exclude_surface]: Excluding surface name='%s' ...", name)) end
-    surfaces.exclude(name)
+    if not surfaces.is_excluded(name) then
+      if debug_log then log(string.format("[exclude_surface]: Excluding surface name='%s' ...", name)) end
+      surfaces.exclude(name)
+    end
 
     if debug_log then log("[exclude_surface]: EXIT!") end
   end,
@@ -294,8 +297,10 @@ remote.add_interface("AbandonedRuins",
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     end
 
-    if debug_log then log(string.format("[reinclude_surface]: Reincluding surface name='%s' ...", name)) end
-    surfaces.reinclude(name)
+    if surfaces.is_excluded(name) then
+      if debug_log then log(string.format("[reinclude_surface]: Reincluding surface name='%s' ...", name)) end
+      surfaces.reinclude(name)
+    end
 
     if debug_log then log("[reinclude_surface]: EXIT!") end
   end,

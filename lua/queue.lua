@@ -21,7 +21,7 @@ function queue.add_ruin(queue_item)
   elseif queue_item.surface.name == constants.DEBUG_SURFACE_NAME then
     error(string.format("Debug surface '%s' has no random ruin spawning.", queue_item.surface.name))
   elseif utils.str_contains_any_from_table(queue_item.surface.name, surfaces.get_all_excluded()) then
-    error(string.format("queue_item.surface.name='%s' is excluded - EXIT!", queue_item.surface.name))
+    error(string.format("queue_item.surface.name='%s' is excluded, cannot spawn ruins on", queue_item.surface.name))
   elseif type(queue_item.size) ~= "string" then
     error(string.format("Table queue_item.size[]='%s' is not of unexpected type 'string'", type(queue_item.size)))
   elseif not utils.list_contains(spawning.ruin_sizes, queue_item.size) then
