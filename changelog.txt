@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.3
+Date: 2025-08-28
+  Bugfixes:
+    - use `game.surfaces[name].planet` instead of some `data.raw` as the later one is not
+      available on control phase
+    - also added same checks in inner functions
+    - renamed migrations (won't hurt)
+---------------------------------------------------------------------------------------------------
 Version: 1.4.2
 Date: 2025-08-27
   Minor:
