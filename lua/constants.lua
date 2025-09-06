@@ -8,6 +8,10 @@ local constants = {
   ---@type string
   ENABLE_DEBUG_LOG_KEY = "ruins-enable-debug-log",
 
+  -- Configuration key for enabling debug on_nth_tick
+  ---@type string
+  ENABLE_DEBUG_ON_TICK_KEY = "ruins-enable-debug-on-tick",
+
   -- Key for distance between two spawn ticks
   ---@type uint
   SPAWN_TICK_DISTANCE_KEY = "ruins-spawn-tick-distance",

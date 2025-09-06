@@ -5,7 +5,7 @@ local surfaces = require("lua/surfaces")
 local queue = require("lua/queue")
 
 debug_log = settings.global[constants.ENABLE_DEBUG_LOG_KEY].value
-debug_on_tick = settings.global["ruins-enable-debug-on-tick"].value
+debug_on_tick = settings.global[constants.ENABLE_DEBUG_ON_TICK_KEY].value
 local spawn_tick = settings.global[constants.SPAWN_TICK_DISTANCE_KEY].value
 
 -- Init ruin sets (empty for now)
@@ -16,7 +16,7 @@ local on_entity_force_changed_event = script.generate_event_name()
 
 local function update_debug_log()
   debug_log = settings.global[constants.ENABLE_DEBUG_LOG_KEY].value
-  debug_on_tick = settings.global["ruins-enable-debug-on-tick"].value
+  debug_on_tick = settings.global[constants.ENABLE_DEBUG_ON_TICK_KEY].value
   utils.output_message(string.format("Ruins: debug log is now: debug=%s,on_tick=%s", debug_log, debug_on_tick))
 end
 
