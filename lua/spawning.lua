@@ -450,7 +450,7 @@ spawning.allow_spawning_on = function (surface, ruinset_name)
   end
 
   if debug_log then log(string.format("[allow_spawning_on]: Checking surface.name='%s',ruinset_name='%s' ...", surface.name, ruinset_name)) end
-  local allow = spawning.no_spawning[surface.name] ~= nil and ruinset_name == spawning.no_spawning[surface.name]
+  local allow = not (spawning.no_spawning[surface.name] ~= nil and ruinset_name == spawning.no_spawning[surface.name])
 
   if debug_log then log(string.format("[allow_spawning_on]: allow='%s' - EXIT!", allow)) end
   return allow
