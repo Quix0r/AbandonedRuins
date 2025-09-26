@@ -277,7 +277,7 @@ remote.add_interface("AbandonedRuins",
     if debug_log then log(string.format("[exclude_surface]: name[]='%s',ruin_sets[]='%s' - CALLED!", type(name), type(ruin_sets))) end
     if type(name) ~= "string" then
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
-    elseif game.surfaces[name].planet ~= nil then
+    elseif game.surfaces[name] ~= nil and game.surfaces[name].planet ~= nil then
       error(string.format("Surface name='%s' is a planet surface. This function is for internal or underground surfaces only. If you want your ruins not spawning on a certain planet, use `no_spawning` for individual ruins or invoke the remote-call function `no_spawning_on` to exclude your ruin-set from a planet entirely.", name))
     end
 
