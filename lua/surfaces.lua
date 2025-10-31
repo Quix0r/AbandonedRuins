@@ -3,6 +3,9 @@ local surfaces = {}
 
 -- Always-excluded surfaces (intended for "internal" surfaces, don't add your planet here)
 ---@type table<string, boolean>
+-- @todo Move this all to the corresponding mods, as they can invoke
+-- @todo remote-interface function `exclude_surface` instead of this list is
+-- @todo getting longer over time. DO NOT invoke below function directly!
 surfaces.excluded = {
   ["beltlayer"]     = true,
   ["pipelayer"]     = true,

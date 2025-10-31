@@ -23,6 +23,7 @@ end
 local function init()
   if debug_log then log("[init]: CALLED!") end
   if game then
+    log("[init]: Initializing enemy force' cease fire ...")
     utils.set_enemy_force_cease_fire(utils.get_enemy_force(), not settings.global["ruins-enemy-not-cease-fire"].value)
   else
     log("[init]: Cannot intitialize enemy force' cease fire, this is normal during on_load event.")
