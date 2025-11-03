@@ -1,4 +1,17 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.8
+Date: 2025-11-02
+  Changes:
+    - moved events and their functiosn to lua/events.lua
+  API:
+    - added remote-call function `get_ruin_sets()` for getting all ruin-sets, type: `table<string, RuinSet>`
+  Minor:
+    - added log message
+    - added internal TODO: If you want a "planet"/surface being blacklisted (nothing being spawned)
+      I won't add it to `surfaces.excluded` list for you, please invoke remote-call function
+      `exclude_surface` if your surface isn't a planet' surface (e.g. NiceFill has such "hidden"
+      surface) or `no_spawning_on()` for each ruin-set individually
+---------------------------------------------------------------------------------------------------
 Version: 1.4.7
 Date: 2025-09-27
   Bugfixes:
