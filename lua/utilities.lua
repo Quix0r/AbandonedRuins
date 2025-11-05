@@ -85,6 +85,7 @@ end
 ---@param damage_info Damage
 ---@param amount number
 util.safe_damage = function(entity, damage_info, amount)
+  if debug_log then log(string.format("[safe_damage]: entity[]='%s',damage_info[]='%s',amount=%d' - CALLED!", type(entity), type(damage_info), number)) end
   if not (entity and entity.valid) then
     log(string.format("[safe_damage]: entity[]='%s' is not valid!", type(entity)))
     return
@@ -93,11 +94,14 @@ util.safe_damage = function(entity, damage_info, amount)
   end
 
   entity.damage(amount, damage_info.force or "neutral", damage_info.type or "physical")
+
+  if debug_log then log("[safe_damage]: EXIT!") end
 end
 
 ---@param entity LuaEntity
 ---@param chance number
 util.safe_die = function(entity, chance)
+  if debug_log then log(string.format("[safe_die]: entity[]='%s',chance=%d - CALLED!", type(entity), chance)) end
   if not (entity and entity.valid) then
     log(string.format("[safe_die]: entity[]='%s' is not valid!", type(entity)))
     return
@@ -108,25 +112,41 @@ util.safe_die = function(entity, chance)
   if math.random() <= chance then
     entity.die()
   end
+
+  if debug_log then log("[safe_die]: EXIT!") end
 end
 
 -- Set cease_fire status for all forces.
 ---@param enemy_force LuaForce
 ---@param cease_fire boolean
 util.set_enemy_force_cease_fire = function(enemy_force, cease_fire)
+  if debug_log then log(string.format("[set_enemy_force_cease_fire]: enemy_force[]='%s',cease_fire='%s'", type(enemy_force), cease_fire)) end
+  if type(cease_fire) ~= "boolean" then
+    error(string.format("cease_fire[]='%s' is not of expected type 'boolean'", type(cease_fire)))
+  end
+
   for _, force in pairs(game.forces) do
+    if debug_log then log(string.format("[set_enemy_force_cease_fire]: force[]='%s'", type(force))) end
     if force ~= enemy_force then
       force.set_cease_fire(enemy_force, cease_fire)
       enemy_force.set_cease_fire(force, cease_fire)
     end
   end
+
+  if debug_log then log("[set_enemy_force_cease_fire]: EXIT!") end
 end
 
 -- Set cease_fire status for all forces and friend = true for all biter forces.
 ---@param enemy_force LuaForce
 ---@param cease_fire boolean
 util.set_enemy_force_diplomacy = function(enemy_force, cease_fire)
+  if debug_log then log(string.format("[set_enemy_force_diplomacy]: enemy_force[]='%s',cease_fire='%s'", type(enemy_force), cease_fire)) end
+  if type(cease_fire) ~= "boolean" then
+    error(string.format("cease_fire[]='%s' is not of expected type 'boolean'", type(cease_fire)))
+  end
+
   for _, force in pairs(game.forces) do
+    if debug_log then log(string.format("[set_enemy_force_diplomacy]: force[]='%s'", type(force))) end
     if force.ai_controllable then
       force.set_friend(enemy_force, true)
       enemy_force.set_friend(force, true)
@@ -134,6 +154,8 @@ util.set_enemy_force_diplomacy = function(enemy_force, cease_fire)
   end
 
   util.set_enemy_force_cease_fire(enemy_force, cease_fire)
+
+  if debug_log then log("[set_enemy_force_diplomacy]: EXIT!") end
 end
 
 -- Setups configured enemy force and returns it
@@ -164,6 +186,7 @@ end
 ---@param name string
 ---@param is_default boolean
 util.register_ruin_set = function(name, is_default)
+  if debug_log then log(string.format("[register_ruin_set]: name='%s',is_default='%s' - CALLED!", name, is_default)) end
   if type(name) ~= "string" then
     error(string.format("name[]='%s' is not expected type 'string'", type(name)))
   elseif type(is_default) ~= "boolean" then
@@ -180,24 +203,30 @@ util.register_ruin_set = function(name, is_default)
   if is_default then
     set.default_value = name
   end
+
+  if debug_log then log("[register_ruin_set]: EXIT!") end
 end
 
 -- Returns "unknown" if optional (but recommended) table key `name` isn't found or otherwise it returns that key's value
 ---@param ruin Ruin
 ---@return string
 util.get_ruin_name = function(ruin)
+  if debug_log then log(string.format("[get_ruin_name]: ruin[]='%s' - CALLED!", type(ruin))) end
   local name = "unknown"
 
   if type(ruin.name) == "string" then
+    if debug_log then log(string.format("[get_ruin_name]: Setting ruin.name='%s' ...", ruin.name)) end
     name = ruin.name
   end
 
+  if debug_log then log(string.format("[get_ruin_name]: ruin[]='%s' - EXIT!", type(ruin))) end
   return ruin
 end
 
 -- Outputs game message, if `game` is populated, otherwise it will be logged
 ---@param message string Message to be printed out or logged
 util.output_message = function(message)
+  if debug_log then log(string.format("[output_message]: message='%s' - CALLED!", message)) end
   if type(message) ~= "string" then
     error(string.format("message[]='%s' is not of expected type 'string'", type(message)))
   end
@@ -207,6 +236,8 @@ util.output_message = function(message)
   else
     log(message)
   end
+
+  if debug_log then log("[output_message]: EXIT!") end
 end
 
 -- Checks if given value is found in list

@@ -26,9 +26,11 @@ local function init()
   end
 
   -- Initialize spawn changes array (isn't stored in save-game)
+  if debug_log then log("[init]: Invoking spawning.init() ...") end
   spawning.init()
 
   -- Update debug flags
+  if debug_log then log("[init]: Invoking update_debug_log() ...") end
   update_debug_log()
 
   ---@type boolean
