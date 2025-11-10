@@ -116,7 +116,7 @@ script.on_event(defines.events.on_chunk_generated, function (event)
     if debug_log then log(string.format("[on_chunk_generated]: spawn_chance=%.2f,size[%s]='%s'", spawn_chance, type(size), size)) end
     if spawn_chance <= spawning.get_spawn_chance(size) then
       if debug_log then log(string.format("[on_chunk_generated]: Trying to spawn ruin of size='%s' at event.surface='%s' ...", size, event.surface)) end
-      try_ruin_spawn(size, min_distance, center, event.surface)
+      spawning.try_ruin_spawn(size, min_distance, center, event.surface)
 
       if debug_log then log("[on_chunk_generated]: Ruin was attempted to spawn - BREAK!") end
       break

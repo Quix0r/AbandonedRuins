@@ -1,6 +1,8 @@
 local constants = require("constants")
-local utils = require("utilities")
 local expressions = require("lua/expression_parsing")
+local queue = require("lua/queue")
+local surfaces = require("lua/surfaces")
+local utils = require("utilities")
 
 local spawning = {}
 
@@ -454,6 +456,56 @@ spawning.allow_spawning_on = function (surface, ruinset_name)
 
   if debug_log then log(string.format("[allow_spawning_on]: allow='%s' - EXIT!", allow)) end
   return allow
+end
+
+---@param size string
+---@param min_distance number
+---@param center MapPosition
+---@param surface LuaSurface
+function spawning.try_ruin_spawn(size, min_distance, center, surface)
+  if debug_log then log(string.format("[try_ruin_spawn]: size='%s',min_distance=%d,center[]='%s',surface[]='%s' - CALLED!", size, min_distance, type(center), type(surface))) end
+  if type(size) ~= "string" then
+    error(string.format("size[]='%s' is not expected type 'string'", type(size)))
+  elseif not utils.list_contains(spawning.ruin_sizes, size) then
+    error(string.format("size='%s' is not a valid ruin size", size))
+  elseif utils.ruin_min_distance_multiplier[size] == nil then
+    error(string.format("size='%s' is not found in multiplier table", size))
+  elseif type(min_distance) ~= "number" then
+    error(string.format("min_distance[]='%s' is not expected type 'string'", type(min_distance)))
+  elseif surface.name == constants.DEBUG_SURFACE_NAME then
+    error(string.format("Debug surface '%s' has no random ruin spawning.", surface.name))
+  elseif utils.str_contains_any_from_table(surface.name, surfaces.get_all_excluded()) then
+    error(string.format("surface.name='%s' is excluded, cannot spawn ruins on", surface.name))
+  elseif settings.global[constants.CURRENT_RUIN_SET_KEY].value == constants.NONE then
+    error("No ruin-set selected by player but this function was invoked. This should not happen.")
+  end
+
+  if debug_log then log(string.format("[try_ruin_spawn]: min_distance=%d - BEFORE!", min_distance)) end
+  min_distance = min_distance * utils.ruin_min_distance_multiplier[size]
+  if debug_log then log(string.format("[try_ruin_spawn]: min_distance=%d - AFTER!", min_distance)) end
+
+  if math.abs(center.x) < min_distance and math.abs(center.y) < min_distance then
+    if debug_log then log(string.format("[try_ruin_spawn]: min_distance=%d is to close to spawn area - EXIT!", min_distance)) end
+    return
+  end
+
+  -- random variance so they aren't always chunk aligned
+  local variance = -(utils.ruin_half_sizes[size] * 0.75) + 12 -- 4 -> 9, 8 -> 6, 16 -> 0. Was previously 4 -> 10, 8 -> 5, 16 -> 0
+  if debug_log then log(string.format("[try_ruin_spawn]: variance=%.2f,center.x=%d,center.y=%d - BEFORE!", variance, center.x, center.y)) end
+  if variance > 0 then
+    if debug_log then log(string.format("[try_ruin_spawn]: Applying random variance=%.2f ...", variance)) end
+    center.x = center.x + math.random(-variance, variance)
+    center.y = center.y + math.random(-variance, variance)
+  end
+  if debug_log then log(string.format("[try_ruin_spawn]: variance=%.2f,center.x=%d,center.y=%d - AFTER!", variance, center.x, center.y)) end
+
+  queue.add_ruin({
+    size    = size,
+    center  = center,
+    surface = surface
+  })
+
+  if debug_log then log("[try_ruin_spawn]: EXIT!") end
 end
 
 return spawning

@@ -1,7 +1,5 @@
 local constants = require("constants")
 local utils = require("utilities")
-local surfaces = require("surfaces")
-local spawning = require("spawning")
 
 --- "Class/library" for ruin queue
 local queue = {}
@@ -20,12 +18,8 @@ function queue.add_ruin(queue_item)
     error(string.format("Table queue_item.surface[]='%s' is not of unexpected type 'userdata'", type(queue_item.surface)))
   elseif queue_item.surface.name == constants.DEBUG_SURFACE_NAME then
     error(string.format("Debug surface '%s' has no random ruin spawning.", queue_item.surface.name))
-  elseif utils.str_contains_any_from_table(queue_item.surface.name, surfaces.get_all_excluded()) then
-    error(string.format("queue_item.surface.name='%s' is excluded, cannot spawn ruins on", queue_item.surface.name))
   elseif type(queue_item.size) ~= "string" then
     error(string.format("Table queue_item.size[]='%s' is not of unexpected type 'string'", type(queue_item.size)))
-  elseif not utils.list_contains(spawning.ruin_sizes, queue_item.size) then
-    error(string.format("queue_item.size='%s' is not a valid ruin size", queue_item.size))
   elseif type(queue_item.center) ~= "table" then
     error(string.format("Table queue_item.center[]='%s' is not of unexpected type 'table'", type(queue_item.center)))
   end

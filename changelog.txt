@@ -3,6 +3,9 @@ Version: 1.4.8
 Date: 2025-11-02
   Changes:
     - moved events and their functiosn to lua/events.lua
+    - also need to move `try_ruin_spawn()` to `spawning` "class"
+    - removed exclusion list from `queue.add_ruin()` function to avoid permanent loop
+    - removed check on `spawning.ruin_sizes` from spawning.lua to avoid permanent loop
   API:
     - added remote-call function `get_ruin_sets()` for getting all ruin-sets, type: `table<string, RuinSet>`
   Minor:
