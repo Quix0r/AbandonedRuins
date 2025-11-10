@@ -1,5 +1,6 @@
 local constants = require("lua/constants")
 local utils = require("lua/utilities")
+local ruinsets = require("lua/ruinsets")
 local spawning = require("lua/spawning")
 local surfaces = require("lua/surfaces")
 local queue = require("lua/queue")
@@ -63,7 +64,7 @@ script.on_nth_tick(spawn_tick, function(event)
   if table_size(ruins) == 0 then
     if debug_on_tick then log(string.format("[on_tick]: event.tick=%d has no ruins to spawn - EXIT!", event.tick)) end
     return
-  elseif not _ruin_sets[ruinset_name] then
+  elseif not ruinsets.get(ruinset_name) then
     error(string.format("ruinset_name='%s' is not registered with this mod. Have you forgotten to invoke `utils.register_ruin_set()`?", ruinset_name))
   end
 
@@ -81,7 +82,7 @@ script.on_nth_tick(spawn_tick, function(event)
     elseif spawning.exclusive_ruinset[queue_item.surface.name] == nil or ruinset_name == spawning.exclusive_ruinset[queue_item.surface.name] then
       -- The ruin-set is either marked as non-exclusive or it surface and ruin-set name are matching
       if debug_on_tick then log(string.format("[on_tick]: Invoking spawning.spawn_random_ruin() with ruinset_name='%s',queue_item.size='%s' ...", ruinset_name, queue_item.size)) end
-      spawning.spawn_random_ruin(_ruin_sets[ruinset_name][queue_item.size], utils.ruin_half_sizes[queue_item.size], queue_item.center, queue_item.surface)
+      spawning.spawn_random_ruin(ruinsets.get(ruinset_name)[queue_item.size], utils.ruin_half_sizes[queue_item.size], queue_item.center, queue_item.surface)
     end
   end
 

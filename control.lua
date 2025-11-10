@@ -1,14 +1,11 @@
 local constants = require("lua/constants")
 local utils = require("lua/utilities")
+local ruinsets = require("lua/ruinsets")
 local spawning = require("lua/spawning")
 local surfaces = require("lua/surfaces")
 
 -- Load events, initialize debug_log variable
 require("lua/events")
-
--- Init ruin sets (empty for now)
----@type table<string, RuinSet>
-local _ruin_sets = {}
 
 remote.add_interface("AbandonedRuins",
 {
@@ -65,7 +62,7 @@ remote.add_interface("AbandonedRuins",
 
   -- Get all ruin-sets
   ---@return table<string, RuinSet>
-  get_ruin_sets = function() return _ruin_sets end,
+  get_ruin_sets = function() return ruinsets.all() end,
 
   -- Any surface whose name contains this string will not have any ruins from any ruin-set mod spawned on it.
   -- Please note, that this feature is intended for "internal" or "hidden" surfaces, such as `NiceFill` uses
@@ -120,7 +117,7 @@ remote.add_interface("AbandonedRuins",
     end
 
     if debug_log then log(string.format("[add_ruin_sets]: Setting name='%s' ruin sets ...", name)) end
-    _ruin_sets[name] = ruin_sets
+    ruinsets.add(name, ruin_sets)
 
     if debug_log then log("[add_ruin_sets]: EXIT!") end
   end,
@@ -135,15 +132,17 @@ remote.add_interface("AbandonedRuins",
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     end
 
-    if debug_log then log(string.format("[get_ruin_set]: _ruin_sets[%s][]='%s' - EXIT!", name, type(_ruin_sets[name]))) end
-    return _ruin_sets[name]
+    local sets = ruinsets.get(name)
+
+    if debug_log then log(string.format("[get_ruin_set]: _sets[%s][]='%s' - EXIT!", name, type(sets))) end
+    return sets
   end,
 
   -- Returns a table with: {<size> = {<array of ruins>}, <size-n> = {<array of ruins>}}}
   ---@return RuinSet
   get_current_ruin_set = function()
     if debug_log then log(string.format("[get_current_ruin_set]: current-ruin-set='%s'", settings.global[constants.CURRENT_RUIN_SET_KEY].value)) end
-    return _ruin_sets[settings.global[constants.CURRENT_RUIN_SET_KEY].value]
+    return ruin_sets.get(settings.global[constants.CURRENT_RUIN_SET_KEY].value)
   end,
 
   -- Registers ruin-set name as exclusive to a surface
