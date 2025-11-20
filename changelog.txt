@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.9
 Date: 2025-??-??
+  Bugfix (potential):
+    - `game.surfaces[name]` might not be initialized at some point
   Documentation:
     - added documentation `SURFACES-PLANETS.md` with code snippets
 ---------------------------------------------------------------------------------------------------
