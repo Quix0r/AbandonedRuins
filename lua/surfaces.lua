@@ -24,7 +24,7 @@ end
 -- Any surface whose name contains this string will not have ruins generated on it.
 ---@param name string
 function surfaces.exclude(name)
-  if debug_log then log(string.format("[exclude]: name[]='%s',ruin_sets[]='%s' - CALLED!", type(name), type(ruin_sets))) end
+  if debug_log then log(string.format("[exclude]: name[]='%s' - CALLED!", type(name))) end
   if type(name) ~= "string" then
     error(string.format("name[]='%s' is not expected type 'string'", type(name)))
   elseif game.surfaces[name] ~= nil and game.surfaces[name].planet ~= nil then

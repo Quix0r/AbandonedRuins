@@ -83,9 +83,9 @@ end
 
 ---@param entity LuaEntity
 ---@param damage_info Damage
----@param amount number
+---@param amount number Amount of damage being applied to the entity
 util.safe_damage = function(entity, damage_info, amount)
-  if debug_log then log(string.format("[safe_damage]: entity[]='%s',damage_info[]='%s',amount=%d' - CALLED!", type(entity), type(damage_info), number)) end
+  if debug_log then log(string.format("[safe_damage]: entity[]='%s',damage_info[]='%s',amount=%d' - CALLED!", type(entity), type(damage_info), amount)) end
   if not (entity and entity.valid) then
     log(string.format("[safe_damage]: entity[]='%s' is not valid!", type(entity)))
     return

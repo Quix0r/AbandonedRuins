@@ -69,7 +69,7 @@ remote.add_interface("AbandonedRuins",
   -- and not for having an entire planet not having any ruins spawned.
   ---@param name string
   exclude_surface = function(name)
-    if debug_log then log(string.format("[exclude_surface]: name[]='%s',ruin_sets[]='%s' - CALLED!", type(name), type(ruin_sets))) end
+    if debug_log then log(string.format("[exclude_surface]: name[]='%s' - CALLED!", type(name))) end
     if type(name) ~= "string" then
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
     elseif game.surfaces[name] ~= nil and game.surfaces[name].planet ~= nil then

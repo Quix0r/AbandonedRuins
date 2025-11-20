@@ -1,8 +1,13 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.9
-Date: 2025-??-??
+Date: 2025-11-20
+  Bugfix:
+    - fixed `utilities.lua:88: bad argument #4 of 5 to 'format' (number expected, got nil)`
   Bugfix (potential):
     - `game.surfaces[name]` might not be initialized at some point
+  Minor:
+    - Accidently left in some old-lost code `ruin_sets[]='%s'` as `exclude/reinclude_surface`
+      only has one parameter
   Documentation:
     - added documentation `SURFACES-PLANETS.md` with code snippets
 ---------------------------------------------------------------------------------------------------
