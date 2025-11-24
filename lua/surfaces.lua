@@ -1,24 +1,30 @@
 --- "Class/library" for surface handling
 local surfaces = {}
 
--- Always-excluded surfaces (intended for "internal" surfaces, don't add your planet here)
----@type table<string, boolean>
--- @todo Move this all to the corresponding mods, as they can invoke
--- @todo remote-interface function `exclude_surface` instead of this list is
--- @todo getting longer over time. DO NOT invoke below function directly!
-surfaces.excluded = {
-  ["beltlayer"]     = true,
-  ["pipelayer"]     = true,
-  ["Factory floor"] = true, -- factorissimo
-  ["ControlRoom"]   = true, -- mobile factory
-  ["NiceFill"]      = true, -- NiceFill's hidden surface
-  ["aai-signals"]   = true  -- AAI Signals' hidden surface
-}
-
 -- Returns all excluded surfaces
 ---@return table<string, boolean>
 function surfaces.get_all_excluded()
-  return surfaces.excluded
+  if debug_log then log(string.format("[get_all_excluded]: storage.excluded[]='%s' - EXIT!", type(storage.excluded))) end
+
+  -- Is the storage initialized
+  if storage.excluded == nil then
+    -- Always-excluded surfaces (intended for "internal" surfaces, don't add your planet here)
+    ---@type table<string, boolean>
+    -- @todo Move this all to the corresponding mods, as they can invoke
+    -- @todo remote-interface function `exclude_surface` instead of this list is
+    -- @todo getting longer over time. DO NOT invoke below function directly!
+    log("Initializing storage.excluded table ...")
+    storage.excluded = {
+      ["beltlayer"]     = true,
+      ["pipelayer"]     = true,
+      ["Factory floor"] = true, -- factorissimo
+      ["ControlRoom"]   = true, -- mobile factory
+      ["NiceFill"]      = true, -- NiceFill's hidden surface
+      ["aai-signals"]   = true  -- AAI Signals' hidden surface
+    }
+  end
+
+  return storage.excluded
 end
 
 -- Any surface whose name contains this string will not have ruins generated on it.
@@ -29,12 +35,12 @@ function surfaces.exclude(name)
     error(string.format("name[]='%s' is not expected type 'string'", type(name)))
   elseif game.surfaces[name] ~= nil and game.surfaces[name].planet ~= nil then
     error(string.format("Surface name='%s' is a planet surface. This function is for internal or underground surfaces only. If you want your ruins not spawning on a certain planet, use `no_spawning` for individual ruins or invoke the remote-call function `no_spawning_on` to exclude your ruin-set from a planet entirely.", name))
-  elseif surfaces.excluded[name] ~= nil then
-    error(string.format("name='%s' is already added to surfaces.excluded table", name))
+  elseif storage.excluded[name] ~= nil then
+    error(string.format("name='%s' is already added to storage.excluded table", name))
   end
 
   if debug_log then log(string.format("[exclude]: Excluding surface name='%s' ...", name)) end
-  surfaces.excluded[name] = true
+  storage.excluded[name] = true
 
   if debug_log then log("[exclude]: EXIT!") end
 end
@@ -47,12 +53,12 @@ function surfaces.reinclude(name)
     error(string.format("name[]='%s' is not expected type 'string'", type(name)))
   elseif game.surfaces[name] ~= nil and game.surfaces[name].planet ~= nil then
     error(string.format("Surface name='%s' is a planet surface. This function is for internal or underground surfaces only. If you want your ruins not spawning on a certain planet, use `no_spawning` for individual ruins or invoke the remote-call function `no_spawning_on` to exclude your ruin-set from a planet entirely.", name))
-  elseif surfaces.excluded[name] == nil then
-    error(string.format("name='%s' is already removed from surfaces.excluded table", name))
+  elseif storage.excluded[name] == nil then
+    error(string.format("name='%s' is already removed from storage.excluded table", name))
   end
 
   if debug_log then log(string.format("[reinclude]: Reincluding surface name='%s' ...", name)) end
-  surfaces.excluded[name] = nil
+  storage.excluded[name] = nil
 
   if debug_log then log("[reinclude]: EXIT!") end
 end
@@ -66,7 +72,7 @@ function surfaces.is_excluded(name)
     error(string.format("name[]='%s' is not expected type 'string'", type(name)))
   end
 
-  local is_excluded = (surfaces.excluded[name] ~= nil and surfaces.excluded[name])
+  local is_excluded = (storage.excluded[name] ~= nil and storage.excluded[name])
 
   if debug_log then log(string.format("[is_excluded]: is_excluded='%s' - EXIT!", is_excluded)) end
 end

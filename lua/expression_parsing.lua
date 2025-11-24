@@ -2,9 +2,6 @@ local constants = require("constants")
 
 local parsing = {}
 
----@type boolean
-debug_log = settings.global[constants.ENABLE_DEBUG_LOG_KEY].value
-
 -- extend table 1 with table 2
 -- no safety checks, very naive
 ---@param table1 table table to extend

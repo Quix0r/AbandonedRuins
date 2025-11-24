@@ -120,7 +120,7 @@ local function spawn_entity(expression, relative_position, center, surface, extr
 
   local force = extra_options.force or "neutral"
   if debug_log then log(string.format("[spawn_entity]: force='%s' - BEFORE!", force)) end
-  if force == "enemy" then
+  if settings.global["ruins-enemy-not-cease-fire"].value == true and force ~= "neutral" then
     force = utils.get_enemy_force()
   end
   if debug_log then log(string.format("[spawn_entity]: force='%s' - AFTER!", force)) end
@@ -187,7 +187,7 @@ local function spawn_entity(expression, relative_position, center, surface, extr
     for name, count_expression in pairs(extra_options.items) do
       if debug_log then log(string.format("[spawn_entity]: name='%s',count_expression='%s'", name, count_expression)) end
       if not _G["prototypes"].item[name] then
-        log(string.format("[spawn_entity]: item '%s' does not exist!", name))
+        log(string.format("[spawn_entity]: item '%s' does not exist - SKIPPED!", name))
       else
         local count = expressions.number(count_expression, vars)
         if debug_log then log(string.format("[spawn_entity]: count=%d", count)) end

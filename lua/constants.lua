@@ -8,7 +8,11 @@ local constants = {
   ---@type string
   ENABLE_DEBUG_LOG_KEY = "ruins-enable-debug-log",
 
-  -- Configuration key for enabling debug on_nth_tick
+  -- Configuration key for enabling debugging utilities
+  ---@type string
+  ENABLE_DEBUG_UTILS_KEY = "ruins-enable-utils",
+
+  -- Configuration key for enabling debugging on_nth_tick events
   ---@type string
   ENABLE_DEBUG_ON_TICK_KEY = "ruins-enable-debug-on-tick",
 

@@ -5,8 +5,6 @@ local spawning = require("lua/spawning")
 local surfaces = require("lua/surfaces")
 local queue = require("lua/queue")
 
-debug_log = settings.global[constants.ENABLE_DEBUG_LOG_KEY].value
-debug_on_tick = settings.global[constants.ENABLE_DEBUG_ON_TICK_KEY].value
 local spawn_tick = settings.global[constants.SPAWN_TICK_DISTANCE_KEY].value
 
 local on_entity_force_changed_event = script.generate_event_name()
@@ -164,4 +162,18 @@ script.on_event({defines.events.on_player_selected_area, defines.events.on_playe
   end
 
   if debug_log then log("[on_player_selected_area]: EXIT!") end
+end)
+
+script.on_event(defines.events.on_pre_surface_deleted, function(event)
+  if debug_log then log(string.format("[on_pre_surface_deleted]: event.surface_index=%d - CALLED!", event.surface_index)) end
+
+  local surface = game.surfaces[event.surface_index] or nil
+  if debug_log then log(string.format("[on_pre_surface_deleted]: surface[]='%s'", type(surface))) end
+
+  if surface ~= nil and surfaces.is_excluded(surface.name) then
+    if debug_log then log(string.format("[on_pre_surface_deleted]: Invoking surfaces.reinclude(%s) ...", surface.name)) end
+    surfaces.reinclude(surface.name)
+  end
+
+  if debug_log then log("[on_pre_surface_deleted]: EXIT!") end
 end)

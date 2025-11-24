@@ -1,4 +1,18 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.10
+Date: 2025-11-24
+  Bugfixes:
+    - wrong/old name `ruin_sets` used, the library's name is `ruinsets`
+    - `utils.get_ruin_name()` has returned the ruin, not the fixed name
+  Changes:
+    - introduced debugging of utlities "class"
+    - Introduced function `ruinsets.isset()` which checks if a ruin-set with given name is loaded
+    - moved temporary `surfaces.excluded` to persisted `storage` so mods like
+      BluePrint have it easier
+    - registered on event `on_pre_surface_deleted` to re-include a now being
+      destroyed surface from the index. This reduces a bit save-game size
+    - added debug lines to `utils.get_enemy_force()`
+---------------------------------------------------------------------------------------------------
 Version: 1.4.9
 Date: 2025-11-20
   Bugfix:

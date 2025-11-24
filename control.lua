@@ -4,6 +4,10 @@ local ruinsets = require("lua/ruinsets")
 local spawning = require("lua/spawning")
 local surfaces = require("lua/surfaces")
 
+debug_log = settings.global[constants.ENABLE_DEBUG_LOG_KEY].value
+debug_utils = settings.global[constants.ENABLE_DEBUG_UTILS_KEY].value
+debug_on_tick = settings.global[constants.ENABLE_DEBUG_ON_TICK_KEY].value
+
 -- Load events, initialize debug_log variable
 require("lua/events")
 
@@ -130,11 +134,14 @@ remote.add_interface("AbandonedRuins",
     if debug_log then log(string.format("[get_ruin_set]: name[]='%s' - CALLED!", type(name))) end
     if type(name) ~= "string" then
       error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+    elseif not ruinsets.isset(name) then
+      if debug_log then log(string.format("[get_ruin_set]: name='%s' isn't a valid ruin-set name, returning nil ... - EXIT!", name)) end
+      return nil
     end
 
     local sets = ruinsets.get(name)
 
-    if debug_log then log(string.format("[get_ruin_set]: _sets[%s][]='%s' - EXIT!", name, type(sets))) end
+    if debug_log then log(string.format("[get_ruin_set]: sets[%s][]='%s' - EXIT!", name, type(sets))) end
     return sets
   end,
 
@@ -142,7 +149,7 @@ remote.add_interface("AbandonedRuins",
   ---@return RuinSet
   get_current_ruin_set = function()
     if debug_log then log(string.format("[get_current_ruin_set]: current-ruin-set='%s'", settings.global[constants.CURRENT_RUIN_SET_KEY].value)) end
-    return ruin_sets.get(settings.global[constants.CURRENT_RUIN_SET_KEY].value)
+    return ruinsets.get(settings.global[constants.CURRENT_RUIN_SET_KEY].value)
   end,
 
   -- Registers ruin-set name as exclusive to a surface

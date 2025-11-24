@@ -9,16 +9,22 @@ data:extend({
     order = "a",
   },{
     type = "bool-setting",
-    name = "ruins-enable-debug-log",
+    name = constants.ENABLE_DEBUG_LOG_KEY,
     setting_type = "runtime-global",
     default_value = false,
     order = "aa",
   },{
     type = "bool-setting",
-    name = "ruins-enable-debug-on-tick",
+    name = constants.ENABLE_DEBUG_UTILS_KEY,
     setting_type = "runtime-global",
     default_value = false,
     order = "ab",
+  },{
+    type = "bool-setting",
+    name = constants.ENABLE_DEBUG_ON_TICK_KEY,
+    setting_type = "runtime-global",
+    default_value = false,
+    order = "ac",
   },{
     type = "string-setting",
     name = constants.CURRENT_RUIN_SET_KEY,

@@ -12,6 +12,20 @@ function ruinsets.all()
   return _ruin_sets
 end
 
+-- Checks wether given ruinset name is found
+function ruinsets.isset(name)
+  if debug_log then log(string.format("[isset]: name[]='%s' - CALLED!", type(name))) end
+  if type(name) ~= "string" then
+    error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+  end
+
+  if debug_log then log(string.format("[isset]: Checking ruin-set name='%s' ...", name)) end
+  local isset = (_ruin_sets[name] ~= nil)
+
+  if debug_log then log(string.format("[isset]: isset=%s - EXIT!", isset)) end
+  return isset
+end
+
 -- The ruins should have the sizes given in utils.ruin_half_sizes, e.g. ruins in the small_ruins array should be 8x8 tiles.
 -- See also: docs/ruin_sets.md
 ---@param name string
@@ -37,6 +51,8 @@ function ruinsets.get(name)
   if debug_log then log(string.format("[get]: name[]='%s' - CALLED!", type(name))) end
   if type(name) ~= "string" then
     error(string.format("name[]='%s' is not expected type 'string'", type(name)))
+  elseif _ruin_sets[name] == nil then
+    error(string.format("ruin-set with name='%s' not found", name))
   end
 
   if debug_log then log(string.format("[get]: _ruin_sets[%s][]='%s' - EXIT!", name, type(_ruin_sets[name]))) end
