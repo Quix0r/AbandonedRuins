@@ -10,7 +10,7 @@ local constants = {
 
   -- Configuration key for enabling debugging utilities
   ---@type string
-  ENABLE_DEBUG_UTILS_KEY = "ruins-enable-utils",
+  ENABLE_DEBUG_UTILS_KEY = "ruins-enable-debug-utils",
 
   -- Configuration key for enabling debugging on_nth_tick events
   ---@type string
