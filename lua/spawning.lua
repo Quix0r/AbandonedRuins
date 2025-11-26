@@ -474,6 +474,8 @@ function spawning.try_ruin_spawn(size, min_distance, center, surface)
     error(string.format("min_distance[]='%s' is not expected type 'string'", type(min_distance)))
   elseif surface.name == constants.DEBUG_SURFACE_NAME then
     error(string.format("Debug surface '%s' has no random ruin spawning.", surface.name))
+  elseif surface.generate_with_lab_tiles == true then
+    error(string.format("surface.name='%s' is a lab, no spawning allowed", surface.name))
   elseif utils.str_contains_any_from_table(surface.name, surfaces.get_all_excluded()) then
     error(string.format("surface.name='%s' is excluded, cannot spawn ruins on", surface.name))
   elseif settings.global[constants.CURRENT_RUIN_SET_KEY].value == constants.NONE then

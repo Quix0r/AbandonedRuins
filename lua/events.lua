@@ -96,7 +96,10 @@ script.on_event(defines.events.on_chunk_generated, function (event)
     if debug_log then log("[on_chunk_generated]: Spawning ruins is disabled by configuration - EXIT!") end
     return
   elseif event.surface.name == constants.DEBUG_SURFACE_NAME then
-    if debug_log then log(string.format("[on_chunk_generated]: Debug surface '%s' must spawn ruins on their own, not through randomness.", event.surface.name)) end
+    if debug_log then log(string.format("[on_chunk_generated]: Debug surface '%s' must spawn ruins on their own, not through randomness - EXIT!", event.surface.name)) end
+    return
+  elseif event.surface.generate_with_lab_tiles == true then
+    if debug_log then log(string.format("[on_chunk_generated]: event.surface.name='%s' is a lab, no spawning here - EXIT!", event.surface.name)) end
     return
   elseif settings.global[constants.CURRENT_RUIN_SET_KEY].value == constants.NONE then
     if debug_log then log("[on_chunk_generated]: No ruin-set selected by player - EXIT!") end

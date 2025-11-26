@@ -1,6 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.12
 Date: 2025-11-26
+  Changes:
+    - no spawning allowed/wanted in "labs" aka. Sandboxes, thanks to @somethingtohide for making me
+      aware of this flag
   Fixed:
     - wrong configuration key specified
 ---------------------------------------------------------------------------------------------------
