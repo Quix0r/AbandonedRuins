@@ -1,19 +1,25 @@
 --- "Class/library" for surface handling
 local surfaces = {}
 
--- Returns all excluded surfaces
----@return table<string, boolean>
-function surfaces.get_all_excluded()
-  if debug_log then log(string.format("[get_all_excluded]: storage.excluded[]='%s' - EXIT!", type(storage.excluded))) end
+-- Initializes persisted table `excluded` if not found
+local function init_excluded ()
+  if debug_log then log("[init_excluded]: CALLED!") end
 
-  -- Is the storage initialized
+  -- Has the storage been initialized?
   if storage.excluded == nil then
-    -- Always-excluded surfaces (intended for "internal" surfaces, don't add your planet here)
+    -- Always-excluded surfaces (intended for "internal" surfaces, DO NOT add your planet here)
+    -- Surfaces listed (and later added by invoking remote-call function `exclude_surface`) here
+    -- will have NO ruins at spawned on. If you want to have some ruin-sets not being spawned
+    -- on your planet DO NOT add it here, use remote-call function `no_spawning_on` instead.
+    --
+    -- I will refuse ALL requests of planets or any other further surface being added here. Your
+    -- mod can simply invoke any of both mentioned remote-call function of having your surface
+    -- excluded.
     ---@type table<string, boolean>
     -- @todo Move this all to the corresponding mods, as they can invoke
     -- @todo remote-interface function `exclude_surface` instead of this list is
-    -- @todo getting longer over time. DO NOT invoke below function directly!
-    log("Initializing storage.excluded table ...")
+    -- @todo getting longer and longer over time.
+    if debug_log then log("[init_excluded]: Initializing storage.excluded table ...") end
     storage.excluded = {
       ["beltlayer"]     = true,
       ["pipelayer"]     = true,
@@ -24,6 +30,18 @@ function surfaces.get_all_excluded()
     }
   end
 
+  if debug_log then log("[init_excluded]: EXIT!") end
+end
+
+-- Returns all excluded surfaces
+---@return table<string, boolean>
+function surfaces.get_all_excluded()
+  if debug_log then log("[get_all_excluded]: CALLED!") end
+
+  -- Init table (if not found)
+  init_excluded()
+
+  if debug_log then log(string.format("[get_all_excluded]: storage.excluded[]='%s' - EXIT!", type(storage.excluded))) end
   return storage.excluded
 end
 
@@ -38,6 +56,9 @@ function surfaces.exclude(name)
   elseif storage.excluded[name] ~= nil then
     error(string.format("name='%s' is already added to storage.excluded table", name))
   end
+
+  -- Init table (if not found)
+  init_excluded()
 
   if debug_log then log(string.format("[exclude]: Excluding surface name='%s' ...", name)) end
   storage.excluded[name] = true
@@ -57,6 +78,9 @@ function surfaces.reinclude(name)
     error(string.format("name='%s' is already removed from storage.excluded table", name))
   end
 
+  -- Init table (if not found)
+  init_excluded()
+
   if debug_log then log(string.format("[reinclude]: Reincluding surface name='%s' ...", name)) end
   storage.excluded[name] = nil
 
@@ -71,6 +95,9 @@ function surfaces.is_excluded(name)
   if type(name) ~= "string" then
     error(string.format("name[]='%s' is not expected type 'string'", type(name)))
   end
+
+  -- Init table (if not found)
+  init_excluded()
 
   local is_excluded = (storage.excluded[name] ~= nil and storage.excluded[name])
 

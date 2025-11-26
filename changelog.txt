@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.11
+Date: 2025-11-26
+  Bugfixes:
+    - `storage.excluded` might not have been initialized (my mistake putting it into `get_all_excluded()`)
+      thanks to @toynbeeidea for reporting it
+    - bumped Factorio version to 2.0.72 (latest patch)
+---------------------------------------------------------------------------------------------------
 Version: 1.4.10
 Date: 2025-11-24
   Bugfixes:
