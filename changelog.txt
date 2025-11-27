@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.13
+Date: 2025-11-27
+  Fixed:
+    - a long, chained code has caused a `nil` type which caused a raised error in `spawning.spawn_random_ruin()`
+      as the first parameter has to be `table`. Thanks to @gizzum for reporting it.
+    - ops, `#foos` doesn't work when `foos` is a table, need to use `utils.table_size()` instead
+  Changes:
+    - library `ruinsets`'s functions now check on size of ruin-sets, empty tables are being rejected
+---------------------------------------------------------------------------------------------------
 Version: 1.4.12
 Date: 2025-11-26
   Changes:

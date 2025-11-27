@@ -5,6 +5,7 @@ local spawning = require("lua/spawning")
 local surfaces = require("lua/surfaces")
 local queue = require("lua/queue")
 
+---@type number
 local spawn_tick = settings.global[constants.SPAWN_TICK_DISTANCE_KEY].value
 
 local on_entity_force_changed_event = script.generate_event_name()
@@ -53,23 +54,32 @@ script.on_nth_tick(spawn_tick, function(event)
   if debug_on_tick then log(string.format("[on_tick]: event.tick=%d - CALLED!", event.tick)) end
 
   ---@type RuinQueueItem[] All currently queued ruin-queue items
-  local ruins = queue.get_ruins()
+  local queue_items = queue.get_ruins()
 
   ---@type string
   local ruinset_name = settings.global[constants.CURRENT_RUIN_SET_KEY].value
 
-  if debug_on_tick then log(string.format("[on_tick]: runins[]='%s',ruinset_name='%s'", type(ruins), ruinset_name)) end
-  if table_size(ruins) == 0 then
+  if debug_on_tick then log(string.format("[on_tick]: queue_items[]='%s',ruinset_name='%s'", type(queue_items), ruinset_name)) end
+
+  if table_size(queue_items) == 0 then
     if debug_on_tick then log(string.format("[on_tick]: event.tick=%d has no ruins to spawn - EXIT!", event.tick)) end
     return
-  elseif not ruinsets.get(ruinset_name) then
-    error(string.format("ruinset_name='%s' is not registered with this mod. Have you forgotten to invoke `utils.register_ruin_set()`?", ruinset_name))
+  elseif ruinset_name == nil or ruinset_name == "" then
+    if debug_on_tick then log("[on_tick]: No current ruin-set configured - EXIT!") end
+    return
   end
 
-  if debug_on_tick then log(string.format("[on_tick]: Spawning %d random ruin sets ...", table_size(ruins))) end
+  local _ruinsets = ruinsets.get(ruinset_name)
+  if debug_on_tick then log(string.format("[on_tick]: runinset_name='%s' has %d ruin(s) registered.", ruinset_name, table_size(_ruinsets))) end
+  if table_size(_ruinsets) == 0 then
+    log(string.format("[on_tick]: ruinset_name='%s' has no ruins registed but is configured as ruin-set. - EXIT!", ruinset_name))
+    return
+  end
+
+  if debug_on_tick then log(string.format("[on_tick]: Spawning %d random ruin sets ...", table_size(queue_items))) end
 
   ---@type RuinQueueItem Individual ruin-queue item
-  for _, queue_item in pairs(ruins) do
+  for _, queue_item in pairs(queue_items) do
     if debug_on_tick then log(string.format("[on_tick]: Spawning queue_item.size='%s',queue_item.center='%s',queue_item.surface='%s' ...", queue_item.size, tostring(queue_item.center), tostring(queue_item.surface))) end
     if not utils.ruin_half_sizes[queue_item.size] then
       error(string.format("queue_item.size='%s' is not registered in ruin_half_sizes table. Have you forgotten to invoke `utils.register_ruin_set()`?", queue_item.size))
@@ -78,9 +88,16 @@ script.on_nth_tick(spawn_tick, function(event)
     if not spawning.allow_spawning_on(queue_item.surface, ruinset_name) then
       if debug_on_tick then log(string.format("[on_tick]: ruinset_name='%s' is not allowed to spawn on surface='%s' - SKIPPED!", ruinset_name, queue_item.surface.name)) end
     elseif spawning.exclusive_ruinset[queue_item.surface.name] == nil or ruinset_name == spawning.exclusive_ruinset[queue_item.surface.name] then
-      -- The ruin-set is either marked as non-exclusive or it surface and ruin-set name are matching
-      if debug_on_tick then log(string.format("[on_tick]: Invoking spawning.spawn_random_ruin() with ruinset_name='%s',queue_item.size='%s' ...", ruinset_name, queue_item.size)) end
-      spawning.spawn_random_ruin(ruinsets.get(ruinset_name)[queue_item.size], utils.ruin_half_sizes[queue_item.size], queue_item.center, queue_item.surface)
+      -- Get ruins
+      if debug_on_tick then log(string.format("[on_tick]: Getting ruins for ruinset_name='%s',queue_item.size='%s' ...", ruinset_name, queue_item.size)) end
+      local ruins = _ruinsets[queue_item.size]
+
+      if debug_on_tick then log(string.format("[on_tick]: ruins[]='%s'", type(ruins))) end
+      if type(ruins) == "table" and table_size(ruins) > 0 then
+        -- The ruin-set is either marked as non-exclusive or it surface and ruin-set name are matching
+        if debug_on_tick then log(string.format("[on_tick]: Invoking spawning.spawn_random_ruin() with ruins()=%d,ruinset_name='%s',queue_item.size='%s' ...", #ruins, ruinset_name, queue_item.size)) end
+        spawning.spawn_random_ruin(ruins, utils.ruin_half_sizes[queue_item.size], queue_item.center, queue_item.surface)
+      end
     end
   end
 

@@ -36,9 +36,11 @@ function ruinsets.add(name, ruin_sets)
     error(string.format("name[]='%s' is not expected type 'string'", type(name)))
   elseif type(ruin_sets) ~= "table" then
     error(string.format("ruin_sets[]='%s' is not expected type 'table'", type(ruin_sets)))
+  elseif table_size(ruin_sets) == 0 then
+    error(string.format("name='%s' has no ruin-sets included", name))
   end
 
-  if debug_log then log(string.format("[add]: Setting name='%s' ruin sets ...", name)) end
+  if debug_log then log(string.format("[add]: Setting name='%s' ruin-sets ...", name)) end
   _ruin_sets[name] = ruin_sets
 
   if debug_log then log("[add]: EXIT!") end
@@ -53,6 +55,8 @@ function ruinsets.get(name)
     error(string.format("name[]='%s' is not expected type 'string'", type(name)))
   elseif _ruin_sets[name] == nil then
     error(string.format("ruin-set with name='%s' not found", name))
+  elseif table_size(_ruin_sets[name]) == 0 then
+    error(string.format("name='%s' has no ruin-sets included", name))
   end
 
   if debug_log then log(string.format("[get]: _ruin_sets[%s][]='%s' - EXIT!", name, type(_ruin_sets[name]))) end

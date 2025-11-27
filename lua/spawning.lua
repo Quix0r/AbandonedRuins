@@ -400,10 +400,14 @@ spawning.spawn_random_ruin = function(ruins, half_size, center, surface)
   local ruin = nil
   ---@type uint
   local size = table_size(ruins)
+  if debug_log then log(string.format("[spawn_random_ruin]: size=%d", size)) end
 
   -- Spawn a random ruin from the list
   while ruin == nil do
+    if debug_log then log(string.format("[spawn_random_ruin]: ruin[]='%s' - BEFORE!", type(ruin))) end
     ruin = ruins[math.random(size)]
+    if debug_log then log(string.format("[spawn_random_ruin]: ruin[]='%s' - AFTER!", type(ruin))) end
+
     local name = utils.get_ruin_name(ruin)
 
     if debug_log then log(string.format("[spawn_random_ruin]: name='%s',ruin.spawn_on_surfaces[]='%s'", name, type(ruin.spawn_on_surfaces))) end
