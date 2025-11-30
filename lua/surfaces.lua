@@ -6,6 +6,7 @@ local function init_excluded ()
   if debug_log then log("[init_excluded]: CALLED!") end
 
   -- Has the storage been initialized?
+  if debug_log then log(string.format("[init_excluded]: storage.excluded[]='%s'", type(storage.excluded))) end
   if storage.excluded == nil then
     -- Always-excluded surfaces (intended for "internal" surfaces, DO NOT add your planet here)
     -- Surfaces listed (and later added by invoking remote-call function `exclude_surface`) here
@@ -102,6 +103,7 @@ function surfaces.is_excluded(name)
   local is_excluded = (storage.excluded[name] ~= nil and storage.excluded[name])
 
   if debug_log then log(string.format("[is_excluded]: is_excluded='%s' - EXIT!", is_excluded)) end
+  return is_excluded
 end
 
 return surfaces
