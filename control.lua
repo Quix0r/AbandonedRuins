@@ -4,11 +4,14 @@ local ruinsets = require("lua/ruinsets")
 local spawning = require("lua/spawning")
 local surfaces = require("lua/surfaces")
 
+---@type boolean
 debug_log = settings.global[constants.ENABLE_DEBUG_LOG_KEY].value
+---@type boolean
 debug_utils = settings.global[constants.ENABLE_DEBUG_UTILS_KEY].value
+---@type boolean
 debug_on_tick = settings.global[constants.ENABLE_DEBUG_ON_TICK_KEY].value
 
--- Load events, initialize debug_log variable
+-- Load events
 require("lua/events")
 
 remote.add_interface("AbandonedRuins",

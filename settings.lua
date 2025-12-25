@@ -42,7 +42,7 @@ data:extend({
     order = "ba",
   },{
     type = "int-setting",
-    name = constants.SPAWN_TICK_DISTANCE_KEY,
+    name = constants.SPAWN_TICK_SECONDS_KEY,
     setting_type = "runtime-global",
     default_value = 10,
     minimum_value = 1,

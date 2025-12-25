@@ -4,10 +4,10 @@ data.raw["utility-constants"]["default"].default_other_force_color = core_utils.
 data:extend({
   {
     type = "selection-tool",
-    name = "AbandonedRuins-claim",
-    icon = "__AbandonedRuins_updated_fork__/graphics/icons/AbandonedRuins-claim.png",
+    name = "ruins-claim-tool",
+    icon = "__AbandonedRuins_updated_fork__/graphics/icons/ruins-claim-tool.png",
     icon_size = 64,
-    small_icon = "__AbandonedRuins_updated_fork__/graphics/icons/AbandonedRuins-claim.png",
+    small_icon = "__AbandonedRuins_updated_fork__/graphics/icons/ruins-claim-tool.png",
     small_icon_size = 64,
     stack_size = 1,
     select = {
@@ -24,19 +24,19 @@ data:extend({
     flags = {"only-in-cursor", "spawnable"}
   }, {
     type = "shortcut",
-    name = "AbandonedRuins-claim",
+    name = "ruins-claim-tool",
     action = "spawn-item",
-    icon = "__AbandonedRuins_updated_fork__/graphics/icons/AbandonedRuins-claim-shortcut.png",
+    icon = "__AbandonedRuins_updated_fork__/graphics/icons/ruins-claim-tool-shortcut.png",
     icon_size = 32,
-    small_icon = "__AbandonedRuins_updated_fork__/graphics/icons/AbandonedRuins-claim-shortcut.png",
+    small_icon = "__AbandonedRuins_updated_fork__/graphics/icons/ruins-claim-tool-shortcut.png",
     small_icon_size = 32,
-    item_to_spawn = "AbandonedRuins-claim",
-    associated_control_input = "AbandonedRuins-claim"
+    item_to_spawn = "ruins-claim-tool",
+    associated_control_input = "ruins-claim-tool"
   }, {
     type = "custom-input",
-    name = "AbandonedRuins-claim",
+    name = "ruins-claim-tool",
     key_sequence = "SHIFT + C",
     action = "spawn-item",
-    item_to_spawn = "AbandonedRuins-claim"
+    item_to_spawn = "ruins-claim-tool"
   }
 })

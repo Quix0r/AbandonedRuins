@@ -18,7 +18,7 @@ local constants = {
 
   -- Key for distance between two spawn ticks
   ---@type uint
-  SPAWN_TICK_DISTANCE_KEY = "ruins-spawn-tick-distance",
+  SPAWN_TICK_SECONDS_KEY = "ruins-spawn-tick-seconds",
 
   -- Debug surface name
   ---@type string

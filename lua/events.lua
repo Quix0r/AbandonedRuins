@@ -6,7 +6,7 @@ local surfaces = require("lua/surfaces")
 local queue = require("lua/queue")
 
 ---@type number
-local spawn_tick = settings.global[constants.SPAWN_TICK_DISTANCE_KEY].value
+local spawn_tick = settings.global[constants.SPAWN_TICK_SECONDS_KEY].value
 
 local on_entity_force_changed_event = script.generate_event_name()
 
@@ -147,7 +147,7 @@ end)
 
 script.on_event({defines.events.on_player_selected_area, defines.events.on_player_alt_selected_area}, function(event)
   if debug_log then log(string.format("[on_player_selected_area]: event.item='%s',event.entities()=%d - CALLED!", event.item, table_size(event.entities))) end
-  if event.item ~= "AbandonedRuins-claim" then
+  if event.item ~= "ruins-claim-tool" then
     if debug_log then log(string.format("[on_player_selected_area]: event.item='%s' is not ruin claim - EXIT!", event.item)) end
     return
   elseif table_size(event.entities) == 0 then

@@ -19,13 +19,13 @@ local function init_excluded ()
     ---@type table<string, boolean>
     -- @todo Move this all to the corresponding mods, as they can invoke
     -- @todo remote-interface function `exclude_surface` instead of this list is
-    -- @todo getting longer and longer over time.
+    -- @todo getting longer and longer over the time.
     if debug_log then log("[init_excluded]: Initializing storage.excluded table ...") end
     storage.excluded = {
       ["beltlayer"]     = true,
       ["pipelayer"]     = true,
-      ["Factory floor"] = true, -- factorissimo
-      ["ControlRoom"]   = true, -- mobile factory
+      ["Factory floor"] = true, -- factorissimo2
+      ["factory-floor"] = true, -- factorissimo3
       ["NiceFill"]      = true, -- NiceFill's hidden surface
       ["aai-signals"]   = true  -- AAI Signals' hidden surface
     }

@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.15
+Date: 2025-12-13
+  Changes:
+    - renamed `ruins-spawn-tick-distance` to `ruins-spawn-tick-seconds` and its constant in
+      `lua/constants.lua` accordingly to make it more clear, that seconds are configured here
+    - added @type-hints for `debug_*` mod-wide variables
+---------------------------------------------------------------------------------------------------
 Version: 1.4.14
 Date: 2025-11-30
   Fixed:
