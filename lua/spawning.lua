@@ -416,7 +416,7 @@ spawning.spawn_random_ruin = function(ruins, half_size, center, surface)
       if debug_log then log(string.format("[spawn_random_ruin]: Ruin '%s' is not allowed to spawn on surface '%s' - SKIPPED!", name, surface.name)) end
       ruin = nil
     elseif ruin.no_spawning ~= nil and ruin.no_spawning[surface.name] then
-      if debug_log then log(string.format("[spawn_random_ruin]: Surface '%s' is banned from spawning ruin 's%s' - SKIPPED!", surface.name, name)) end
+      if debug_log then log(string.format("[spawn_random_ruin]: Surface '%s' is banned from spawning ruin '%s' - SKIPPED!", surface.name, name)) end
       ruin = nil
     else
       -- Spawn ruin
