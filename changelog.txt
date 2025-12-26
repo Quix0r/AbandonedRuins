@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.18
+Date: 2025-12-26
+  Bugfix:
+    - fixed `007_fix_excluded_surface_names.lua:2: attempt to index field 'excluded' (a nil value)`
+      thanks to @agentid36 for reporting it. I though that migrations only run during update phase?
+---------------------------------------------------------------------------------------------------
 Version: 1.4.17
 Date: 2025-12-25
   Bugfix:
