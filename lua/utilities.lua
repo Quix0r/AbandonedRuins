@@ -98,7 +98,7 @@ end
 
 ---@param entity LuaEntity
 ---@param damage_info Damage
----@param amount number Amount of damage being applied to the entity
+----@param amount number Amount of damage being applied to the entity
 utilities.safe_damage = function(entity, damage_info, amount)
   if debug_utils then log(string.format("[safe_damage]: entity[]='%s',damage_info[]='%s',amount=%d' - CALLED!", type(entity), type(damage_info), amount)) end
   if not (entity and entity.valid) then
@@ -106,11 +106,16 @@ utilities.safe_damage = function(entity, damage_info, amount)
     return
   elseif type(amount) ~= "number" then
     error(string.format("Parameter amount[]='%s' is not expected type 'number'", type(amount)))
-  elseif amount <= 0 then
-    error(string.format("Parameter amount=%.2f cannot be zero or below", amount))
+  elseif amount < 0 then
+    error(string.format("Parameter amount=%.2f is below zero.", amount))
   end
 
-  entity.damage(amount, damage_info.force or "neutral", damage_info.type or "physical")
+  if amount > 0 then
+    if debug_utils then log(string.format("[safe_damage]: Applying damage amount=%.2f to entity.name='%s' ...", amount, entity.name)) end
+    entity.damage(amount, damage_info.force or "neutral", damage_info.type or "physical")
+  elseif debug_utils then
+    log(string.format("[safe_damage]: entity.name='%s' is no damage applied to.", entity.name))
+  end
 
   if debug_utils then log("[safe_damage]: EXIT!") end
 end

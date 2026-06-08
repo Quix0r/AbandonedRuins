@@ -1,9 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.5.4
+Date: 2026-06-08
+  Fixes:
+    - utilities.safe_damage() is now rejecting only negative values, zero is being ignored or at
+      least logged when `debug_utils` is enabled. Thanks to @F3zy for reporting this.
+---------------------------------------------------------------------------------------------------
 Version: 1.5.3
 Date: 2026-06-08
   Fixes:
     - Added a check that no zero/negative damage can be dealt to an entity as this doesn't make
-      sense at all. Thanks to @ShbVal for reporting this
+      sense at all. Thanks to @ShbVal for reporting this.
 ---------------------------------------------------------------------------------------------------
 Version: 1.5.2
 Date: 2026-06-08
