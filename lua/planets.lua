@@ -14,12 +14,6 @@ local sa_planets = {
   ["aquilo"]   = true
 }
 
--- Init storage?
-if not storage.allowed_planets then
-  ---@type table<string, boolean>
-  storage.allowed_planets = {}
-end
-
 -- Init "class" / library
 local planets = {}
 
@@ -63,6 +57,13 @@ function planets.init()
   if debug_log then log(string.format("[init]: Initializing for %d planet(s) ...", #game.planets)) end
   for name, planet in pairs(game.planets) do
     if debug_log then log(string.format("[init]: name='%s',planet[]='%s'", name, type(planet))) end
+    -- Init storage?
+    if storage.allowed_planets == nil then
+      -- Planets to allow spawning on
+      ---@type table<string, boolean>
+      storage.allowed_planets = {}
+    end
+
     -- Is "allow spawning on all planets" enabled or is the planet part of SA?
     storage.allowed_planets[name] = (planet and planet.valid and (settings.startup[constants.ENABLE_SPAWN_RUINS_ALL_PLANETS_KEY].value or sa_planets[name] ~= nil))
     if debug_log then log(string.format("[init]: storage.allowed_planets[%s]='%s'", name, storage.allowed_planets[name])) end
@@ -83,7 +84,7 @@ function planets.is_planet_allowed(planet)
   end
 
   -- Check condition
-  local allowed = storage.allowed_planets[planet.name]
+  local allowed = (storage.allowed_planets[planet.name] ~= nil)
 
   if debug_log then log(string.format("[is_planet_allowed]: allowed='%s' - EXIT!", allowed)) end
   return allowed

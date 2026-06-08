@@ -378,8 +378,6 @@ local function clear_area(half_size, center, surface)
     error("Invalid surface provided")
   elseif surface.name == constants.DEBUG_SURFACE_NAME then
     error(string.format("surface.name='%s' is a debug surface, no clearing needed.", surface.name))
-  elseif surface.name ~= constants.DEBUG_SURFACE_NAME and ruin.spawn_on_surfaces ~= nil and ruin.spawn_on_surfaces[surface.name] == nil then
-    error(string.format("surface.name='%s' is not allowed to spawn this ruin", surface.name))
   end
 
   ---@type BoundingBox
