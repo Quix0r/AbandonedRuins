@@ -22,10 +22,9 @@ if __name__ == '__main__':
             for f in files:
                 if re.match(zip_prefix + '.*' + zip_suffix, f):
                     continue
-                if f.endswith("~"):
+                if f.endswith("~") or f.endswith(".sh") or f.endswith(".py"):
                     continue
                 fullname = os.path.join(root, f)
                 newname = os.path.normpath(os.path.join(version_name, root, f))
                 print("%s -> %s" % (fullname, newname))
                 zout.write(fullname, arcname=newname)
-
