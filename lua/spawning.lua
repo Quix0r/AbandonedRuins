@@ -211,7 +211,7 @@ local function spawn_entity(expression, relative_position, center, surface, extr
   }
 
   if debug_log then log(string.format("[spawn_entity]: e[]='%s',extra_options.dmg[]='%s'", type(e), type(extra_options.dmg))) end
-  if extra_options.dmg then
+  if extra_options.dmg and extra_options.dmg > 0 then
     utils.safe_damage(e, extra_options.dmg, expressions.number(extra_options.dmg.dmg, vars))
   end
 

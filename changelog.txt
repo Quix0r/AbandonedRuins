@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.5.3
+Date: 2026-06-08
+  Fixes:
+    - Added a check that no zero/negative damage can be dealt to an entity as this doesn't make
+      sense at all. Thanks to @ShbVal for reporting this
+---------------------------------------------------------------------------------------------------
 Version: 1.5.2
 Date: 2026-06-08
   Fixes:
