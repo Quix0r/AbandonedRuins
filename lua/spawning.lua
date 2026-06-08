@@ -71,7 +71,7 @@ function spawning.init()
     end
 
     chances[size] = setting.value
-    sumChance += setting.value
+    sumChance = sumChance + setting.value
     if debug_log then log(string.format("[init]: chances[%s]=%.2f", size, chances[size])) end
   end
 

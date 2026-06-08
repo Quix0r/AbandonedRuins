@@ -64,7 +64,7 @@ script.on_event(defines.events.on_player_created, function(event)
   local total_ruins_amount = 0
   for _, size in pairs(remote_call("AbandonedRuins", "get_ruin_sizes")) do
     log(string.format("[on_player_created]: size='%s'", size))
-    total_ruins_amount += ruin_set[size]
+    total_ruins_amount = total_ruins_amount + ruin_set[size]
   end
   local chunk_radius = math.ceil(math.sqrt(total_ruins_amount) / 2)
 
@@ -105,10 +105,10 @@ script.on_event(defines.events.on_player_created, function(event)
       spawning.spawn_ruin(ruin, half_size, center, surface)
       draw_dimensions(center, half_size, surface)
 
-      x += 1
+      x = x + 1
       if (x >= chunk_radius) then
         x = -chunk_radius
-        y += 1
+        y = y + 1
       end
     end
   end

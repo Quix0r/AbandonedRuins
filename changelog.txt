@@ -1,6 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.5.1
+Date: 2026-06-08
+  Fixes:
+    - Lua doesn't seem to like `foo += 1`, so I had to do the longer way. Lua seem to be a single-pass
+      "compiler" (more interpreter): [1], thanks to @F3zy for reporting it
+    - References:
+      1: https://stackoverflow.com/questions/20091779/lua-operators-why-isnt-and-so-on-defined
+---------------------------------------------------------------------------------------------------
 Version: 1.5.0
-Date: 2026-01-10
+Date: 2026-06-08
   Incompatible:
     - renamed remote-call function `set_spawn_ruins` to `enable_spawning_ruins`
     - renamed      --- " ---       `get_spawn_ruins` to `is_spawning_ruins_enabled`
