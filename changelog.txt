@@ -16,7 +16,7 @@ Date: 2026-06-08
   Fixes:
     - Fixed `attempt to index global 'ruin' (a nil value)` in `spawning.lua:381`, thanks to @ShbVal
       for reporting it
-    - had to move initialization of `storage.allowed_planets` into `planet.init()` function to avoid
+    - had to move initialization of `storage.allowed_planets` into `planets.init()` function to avoid
       nil during loading a ~5 months old save game
 ---------------------------------------------------------------------------------------------------
 Version: 1.5.1
