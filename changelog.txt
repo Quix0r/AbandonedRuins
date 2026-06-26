@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.6.0
+Date: 2026-06-26
+  Changes:
+    - Marked compatible with Factorio 2.1. The 2.0 code loads and runs unchanged on 2.1; no code changes were required.
+---------------------------------------------------------------------------------------------------
 Version: 1.5.4
 Date: 2026-06-08
   Fixes:
