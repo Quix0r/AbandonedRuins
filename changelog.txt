@@ -3,7 +3,7 @@ Version: 1.6.0
 Date: 2026-09-07
   Incompatible:
     - Factorio's experiemental version is 2.1, so far nothing is incompatible except the number
-      in info.json
+      in info.json, this was suggested by @tobiaspal
 ---------------------------------------------------------------------------------------------------
 Version: 1.5.8
 Date: 2026-09-07
