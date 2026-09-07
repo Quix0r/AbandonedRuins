@@ -182,7 +182,7 @@ local function spawn_entity(expression, relative_position, center, surface, extr
 
   local force = extra_options.force or "neutral"
   if debug_log then log(string.format("[spawn_entity]: force='%s' - BEFORE!", force)) end
-  if settings.global[constants.ENABLE_ENEMY_NOT_CEASE_FIRE_KEY].value == true and force ~= "neutral" then
+  if force ~= "neutral" and not utils.is_enemy_cease_fire_enabled() then
     force = utils.get_enemy_force()
   end
   if debug_log then log(string.format("[spawn_entity]: force='%s' - AFTER!", force)) end

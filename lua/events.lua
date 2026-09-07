@@ -27,7 +27,7 @@ local function init()
   if debug_log then log("[init]: CALLED!") end
   if game then
     log("[init]: Initializing enemy force' cease fire ...")
-    utils.set_enemy_force_cease_fire(utils.get_enemy_force(), not settings.global[constants.ENABLE_ENEMY_NOT_CEASE_FIRE_KEY].value)
+    utils.set_enemy_force_cease_fire(utils.get_enemy_force(), utils.is_enemy_cease_fire_enabled())
   else
     log("[init]: Cannot intitialize enemy force' cease fire, this is normal during on_load event.")
   end
@@ -55,7 +55,7 @@ script.on_event(defines.events.on_runtime_mod_setting_changed, init)
 
 script.on_event(defines.events.on_force_created, function()
   -- Sets up the diplomacy for all forces, not just the newly created one.
-  utils.set_enemy_force_diplomacy(utils.get_enemy_force(), not settings.global[constants.ENABLE_ENEMY_NOT_CEASE_FIRE_KEY].value)
+  utils.set_enemy_force_diplomacy(utils.get_enemy_force(), utils.is_enemy_cease_fire_enabled())
 end)
 
 script.on_nth_tick(spawn_tick, function(event)

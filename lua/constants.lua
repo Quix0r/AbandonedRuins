@@ -21,8 +21,8 @@ local constants = {
   ENABLE_DEBUG_ON_TICK_KEY = "ruins-enable-debug-on-tick",
 
   -- Key for enemy buildings should start shooting at the player
-  -- (true) or cease fire (false)
-  ENABLE_ENEMY_NOT_CEASE_FIRE_KEY = "ruins-enemy-not-cease-fire",
+  -- (false) or cease fire (true)
+  ENABLE_ENEMY_CEASE_FIRE_KEY = "ruins-enemy-cease-fire",
 
   -- Key for seconds between two spawn ticks
   SPAWN_TICK_SECONDS_KEY = "ruins-spawn-tick-seconds",

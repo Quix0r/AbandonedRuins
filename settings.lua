@@ -16,9 +16,9 @@ data:extend({
     order = "aa"
   }, {
     type = "bool-setting",
-    name = constants.ENABLE_ENEMY_NOT_CEASE_FIRE_KEY,
+    name = constants.ENABLE_ENEMY_CEASE_FIRE_KEY,
     setting_type = "runtime-global",
-    default_value = true,
+    default_value = false,
     order = "ab"
   }, {
     type = "bool-setting",

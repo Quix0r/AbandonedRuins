@@ -294,4 +294,16 @@ utilities.list_contains = function (list, value)
   return found
 end
 
+-- Checks if the setting that enemies should cease fire is enabled
+---@return enabled boolean
+utilities.is_enemy_cease_fire_enabled = function ()
+  if debug_utils then log("[is_enemy_cease_fire_enabled]: CALLED!") end
+
+  -- Check condition
+  local enabled = settings.global[constants.ENABLE_ENEMY_CEASE_FIRE_KEY].value
+
+  if debug_utils then log(string.format("[is_enemy_cease_fire_enabled]: enabled=%s - EXIT!", enabled)) end
+  return enabled
+end
+
 return utilities
