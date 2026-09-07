@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.5.8
+Date: 2026-09-07
+  Changes:
+    - changed negated "no cease-fire" into un-negated "cease-fire" option
+---------------------------------------------------------------------------------------------------
+Version: 1.5.7
+Date: 2026-09-07
+  Fixes:
+    - ops, `spawn_ruin()` need to allow debug world to spawn ruins, too (thanks to @MoSII2710)
+---------------------------------------------------------------------------------------------------
 Version: 1.5.6
 Date: 2026-09-07
   Fixes (thanks to @MoSII2710):
