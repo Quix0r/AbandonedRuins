@@ -61,11 +61,37 @@ script.on_event(defines.events.on_player_created, function(event)
     return
   end
 
+  local ruin_sizes = remote.call("AbandonedRuins", "get_ruin_sizes")
+  local display_ruin_set = {}
   local total_ruins_amount = 0
-  for _, size in pairs(remote.call("AbandonedRuins", "get_ruin_sizes")) do
-    log(string.format("[on_player_created]: size='%s'", size))
-    total_ruins_amount = total_ruins_amount + #ruin_set[size]
+
+  -- The runtime ruin set may contain repeated references used as selection weights.
+  -- The debug world should display each actual ruin definition once.
+  for _, size in pairs(ruin_sizes) do
+    local source_ruins = ruin_set[size] or {}
+    local unique_ruins = {}
+    local seen = {}
+
+    for _, ruin in pairs(source_ruins) do
+      if not seen[ruin] then
+        seen[ruin] = true
+        unique_ruins[#unique_ruins + 1] = ruin
+      end
+    end
+
+    display_ruin_set[size] = unique_ruins
+    total_ruins_amount = total_ruins_amount + #unique_ruins
+    log(string.format(
+      "[on_player_created]: size='%s',weighted=%d,unique=%d",
+      size, #source_ruins, #unique_ruins
+    ))
   end
+
+  if total_ruins_amount == 0 then
+    utils.output_message("Abandoned Ruins: Current ruin-set is empty! Will not create debug world.")
+    return
+  end
+
   local chunk_radius = math.ceil(math.sqrt(total_ruins_amount) / 2)
 
   log(string.format("[on_player_created]: total_ruins_amount=%d,chunk_radius=%.2f", total_ruins_amount, chunk_radius))
@@ -94,7 +120,8 @@ script.on_event(defines.events.on_player_created, function(event)
   local x = -chunk_radius
   local y = -chunk_radius
 
-  for size, ruins in pairs(ruin_set) do
+  for _, size in pairs(ruin_sizes) do
+    local ruins = display_ruin_set[size] or {}
     log(string.format("[on_player_created]: size='%s',ruins()=%d", size, #ruins))
     local half_size = spawning.ruin_half_sizes[size]
 
