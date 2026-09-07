@@ -437,7 +437,7 @@ spawning.spawn_ruin = function(ruin, half_size, center, surface)
   end
 
   if debug_log then log(string.format("[spawn_ruin]: surface.name='%s',DEBUG_SURFACE_NAME='%s'", surface.name, constants.DEBUG_SURFACE_NAME)) end
-  if surface.name ~= constants.DEBUG_SURFACE_NAME and clear_area(half_size, center, surface) then
+  if surface.name == constants.DEBUG_SURFACE_NAME or clear_area(half_size, center, surface) then
     local variables = {}
 
     if debug_log then log(string.format("[spawn_ruin]: ruin.variables[]='%s'", type(ruin.variables))) end
