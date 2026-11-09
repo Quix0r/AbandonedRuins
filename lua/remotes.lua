@@ -36,7 +36,13 @@ remote.add_interface("AbandonedRuins",
 
   -- Get whether ruins should be spawned at all
   ---@return boolean
-  is_spawning_ruins_enabled = function() return spawning.is_spawning_ruins_enabled() end,
+  is_spawning_ruins_enabled = function()
+    if debug_log then log("[is_spawning_ruins_enabled]: CALLED!") end
+    local spawn_ruins = spawning.is_spawning_ruins_enabled()
+
+    if debug_log then log(string.format("[is_spawning_ruins_enabled]: spawn_ruins='%s' - EXIT!", spawn_ruins)) end
+    return spawn_ruins
+  end,
 
   -- Add ruin size and its halfed size
   ---@param size string Size as a lower-case word, e.g. "small"
